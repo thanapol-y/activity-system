@@ -1,0 +1,20 @@
+front-end
+#แก้ไขแล้วหาย - เพิ่ม Gender แล้ว
+- Backend: getProfile JOIN gender table → ส่ง Gender_Name, Faculty_Name, Branch_Name กลับมา
+- Backend: registerStudent รองรับ Gender_ID แล้ว
+- Backend: เพิ่ม endpoint GET /api/reports/genders สำหรับดึงรายการเพศ
+- Frontend: หน้า Student Profile แสดง เพศ, เบอร์โทร, คณะ, สาขา แล้ว
+- Frontend: หน้า Admin Users เพิ่มฟิลด์ เพศ (Gender_ID) สำหรับนักศึกษาแล้ว
+- Frontend/Backend types: เพิ่ม Gender_ID ใน Student interface แล้ว
+
+หัวหน้ากิจกรรม
+#แก้ไขแล้วหาย - สโมสรส่งรายงานปัญหา → แจ้งเตือนหัวหน้ากิจกรรม
+- Database: เพิ่มตาราง problem_report (Report_ID, Activity_ID, Club_ID, Report_Text, Report_Status, Created_At)
+- Backend: เพิ่ม reportController + reportRoutes ที่ /api/reports
+  - POST /api/reports → สโมสรส่งรายงานปัญหา
+  - GET /api/reports/my → สโมสรดูรายงานของตัวเอง
+  - GET /api/reports/activity-head → หัวหน้ากิจกรรมดูรายงานทั้งหมด
+  - PUT /api/reports/:id/status → หัวหน้ากิจกรรมอัพเดตสถานะ (pending/acknowledged/resolved)
+- Frontend (Club Dashboard): ปุ่มรายงานปัญหาส่งข้อมูลจริงไป backend แล้ว
+- Frontend (Activity Head Dashboard): แสดงรายงานปัญหาจากสโมสร พร้อมปุ่ม "รับทราบ" และ "แก้ไขแล้ว"
+
