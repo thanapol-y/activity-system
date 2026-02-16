@@ -99,13 +99,37 @@ export default function MyActivitiesPage() {
     const now = new Date();
     // Only show registered (not cancelled) registrations
     const activeRegs = registrations.filter((reg) => reg.Registration_Status !== 'cancelled');
-    return activeRegs.filter((reg) => {
+    
+    // First filter by date category
+    const filtered = activeRegs.filter((reg) => {
       if (filter === 'upcoming') {
         return reg.Activity_Date && new Date(reg.Activity_Date) >= now;
       } else if (filter === 'past') {
         return reg.Activity_Date && new Date(reg.Activity_Date) < now;
       }
       return true;
+    });
+    
+    // Then sort by date
+    return filtered.sort((a, b) => {
+      if (!a.Activity_Date) return 1;  // No date comes last
+      if (!b.Activity_Date) return -1; // No date comes last
+      
+      const dateA = new Date(a.Activity_Date);
+      const dateB = new Date(b.Activity_Date);
+      
+      // For upcoming events, sort by closest first
+      if (filter === 'upcoming') {
+        return dateA.getTime() - dateB.getTime();
+      } 
+      // For past events, sort by most recent first
+      else if (filter === 'past') {
+        return dateB.getTime() - dateA.getTime();
+      }
+      // For all events, sort by date (newest first)
+      else {
+        return dateB.getTime() - dateA.getTime();
+      }
     });
   };
 

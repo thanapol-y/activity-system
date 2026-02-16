@@ -576,7 +576,8 @@ export const getActivityHistory = async (
         at.Activity_Type_Name,
         r.Registration_Date,
         ci.CheckIn_Time,
-        CASE WHEN ci.Student_ID IS NOT NULL THEN 'Attended' ELSE 'Registered' END as Status
+        CASE WHEN ci.Student_ID IS NOT NULL THEN 'Attended' ELSE 'Registered' END as Status,
+        CASE WHEN ci.Student_ID IS NOT NULL THEN 1 ELSE 0 END as Has_CheckedIn
       FROM registration r
       INNER JOIN activity a ON r.Activity_ID = a.Activity_ID
       LEFT JOIN activity_type at ON a.Activity_Type_ID = at.Activity_Type_ID
