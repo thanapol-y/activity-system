@@ -60,7 +60,7 @@ export default function ClubReportsPage() {
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
                 <p className="text-sm text-gray-500 mb-1">กิจกรรมที่ได้รับมอบหมาย</p>
                 <p className="text-3xl font-bold text-[#2B4C8C]">
-                  {(stats as any)?.summary?.assignedActivities || 0}
+                  {(stats as any)?.summary?.totalActivities || 0}
                 </p>
               </div>
               <div className="bg-white rounded-lg shadow-sm p-6 text-center">
