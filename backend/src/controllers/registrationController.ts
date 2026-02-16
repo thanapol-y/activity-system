@@ -417,16 +417,16 @@ export const checkInWithQRCode = async (
 
     const { studentId, activityId } = parsedData;
 
-    // Check if club is assigned to this activity
-    const [assignments] = await pool.query<RowDataPacket[]>(
-      "SELECT * FROM activity_assignment WHERE Activity_ID = ? AND Club_ID = ?",
-      [activityId, Club_ID],
+    // Check if activity exists and is approved
+    const [activityRows] = await pool.query<RowDataPacket[]>(
+      "SELECT * FROM activity WHERE Activity_ID = ? AND Activity_Status = 'approved'",
+      [activityId],
     );
 
-    if (assignments.length === 0) {
-      res.status(403).json({
+    if (activityRows.length === 0) {
+      res.status(404).json({
         success: false,
-        message: "Your club is not assigned to this activity",
+        message: "Activity not found or not approved",
       });
       return;
     }
@@ -514,20 +514,6 @@ export const getCheckInHistory = async (
     const activityIdStr =
       typeof activityId === "string" ? activityId : activityId[0];
     const Club_ID = req.user.userId;
-
-    // Check if club is assigned to this activity
-    const [assignments] = await pool.query<RowDataPacket[]>(
-      "SELECT * FROM activity_assignment WHERE Activity_ID = ? AND Club_ID = ?",
-      [activityIdStr, Club_ID],
-    );
-
-    if (assignments.length === 0) {
-      res.status(403).json({
-        success: false,
-        message: "Your club is not assigned to this activity",
-      });
-      return;
-    }
 
     // Get check-in history
     const [checkIns] = await pool.query<RowDataPacket[]>(

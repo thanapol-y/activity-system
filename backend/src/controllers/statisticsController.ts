@@ -423,10 +423,9 @@ export const getClubStatistics = async (
 
     const Club_ID = req.user.userId;
 
-    // Get assigned activities
-    const [assignedActivities] = await pool.query<RowDataPacket[]>(
-      "SELECT COUNT(*) as total FROM activity_assignment WHERE Club_ID = ?",
-      [Club_ID],
+    // Get total approved activities
+    const [totalActivities] = await pool.query<RowDataPacket[]>(
+      "SELECT COUNT(*) as total FROM activity WHERE Activity_Status = 'approved'",
     );
 
     // Get total check-ins performed
@@ -435,7 +434,7 @@ export const getClubStatistics = async (
       [Club_ID],
     );
 
-    // Get upcoming assigned activities
+    // Get upcoming approved activities
     const [upcomingActivities] = await pool.query<RowDataPacket[]>(
       `SELECT
         a.Activity_ID,
@@ -444,15 +443,13 @@ export const getClubStatistics = async (
         a.Activity_Time,
         a.Activity_Location,
         COUNT(r.Student_ID) as expected_participants,
-        (SELECT COUNT(*) FROM check_in WHERE Activity_ID = a.Activity_ID AND Club_ID = ?) as checked_in_count
-      FROM activity_assignment aa
-      INNER JOIN activity a ON aa.Activity_ID = a.Activity_ID
+        (SELECT COUNT(*) FROM check_in WHERE Activity_ID = a.Activity_ID) as checked_in_count
+      FROM activity a
       LEFT JOIN registration r ON a.Activity_ID = r.Activity_ID AND r.Registration_Status = 'registered'
-      WHERE aa.Club_ID = ? AND a.Activity_Date >= CURDATE()
+      WHERE a.Activity_Status = 'approved' AND a.Activity_Date >= CURDATE()
       GROUP BY a.Activity_ID, a.Activity_Name, a.Activity_Date, a.Activity_Time, a.Activity_Location
       ORDER BY a.Activity_Date ASC
       LIMIT 10`,
-      [Club_ID, Club_ID],
     );
 
     // Get check-in activity by date (last 7 days)
@@ -471,7 +468,7 @@ export const getClubStatistics = async (
       success: true,
       data: {
         summary: {
-          assignedActivities: assignedActivities[0].total,
+          totalActivities: totalActivities[0].total,
           totalCheckIns: totalCheckIns[0].total,
         },
         upcomingActivities: upcomingActivities,

@@ -118,7 +118,7 @@ export default function ClubDashboardPage() {
                   </span>
                 </div>
                 <h3 className="text-3xl font-bold text-gray-800 mb-2">
-                  {stats?.summary?.totalActivities || 0}
+                  {stats?.summary?.totalActivities ?? stats?.summary?.assignedActivities ?? 0}
                 </h3>
                 <p className="text-sm text-gray-600">กิจกรรมทั้งหมดในระบบ</p>
               </div>
