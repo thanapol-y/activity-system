@@ -107,6 +107,10 @@ export interface Registration {
   Activity_Time?: string;
   Activity_Location?: string;
   Activity_Type_Name?: string;
+  Activity_Hours?: number;
+  Maximum_Capacity?: number;
+  Current_Registrations?: number;
+  Activity_Head_Name?: string;
   Has_CheckedIn?: boolean;
   CheckIn_Time?: string;
 }
@@ -225,6 +229,7 @@ export interface CreateActivityForm {
   Activity_Time: string;
   Activity_Location: string;
   Maximum_Capacity: number;
+  Activity_Hours: number;
   Deadline: string;
 }
 

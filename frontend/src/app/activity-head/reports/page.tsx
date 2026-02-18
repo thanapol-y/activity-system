@@ -244,34 +244,54 @@ export default function ActivityHeadReportsPage() {
               </div>
             )}
 
-            {/* All Activities Table */}
+            {/* All Activities - Detail Cards */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">รายการกิจกรรมทั้งหมด</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อกิจกรรม</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานที่</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">ลงทะเบียน</th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">ความจุ</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {activities.map((act) => (
-                      <tr key={act.Activity_ID} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900">{act.Activity_Name}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{formatDate(act.Activity_Date)}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{act.Activity_Location}</td>
-                        <td className="px-4 py-3 text-sm text-center">{act.Current_Registrations || 0}</td>
-                        <td className="px-4 py-3 text-sm text-center">{act.Maximum_Capacity}</td>
-                        <td className="px-4 py-3">{getStatusBadge(act.Activity_Status)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">ภาพรวมกิจกรรมทั้งหมด (กวาดตาครั้งเดียว)</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {activities.map((act) => {
+                  const regCount = act.Current_Registrations || 0;
+                  const fillPercent = act.Maximum_Capacity > 0 ? Math.round((regCount / act.Maximum_Capacity) * 100) : 0;
+                  const remaining = act.Maximum_Capacity - regCount;
+                  const fillColor = fillPercent >= 90 ? 'bg-red-500' : fillPercent >= 60 ? 'bg-yellow-500' : 'bg-green-500';
+                  return (
+                    <div key={act.Activity_ID} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">{act.Activity_Name}</h4>
+                          <p className="text-xs text-gray-500">{act.Activity_Type_Name || 'ทั่วไป'}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="bg-[#2B4C8C] text-white text-xs font-bold px-2 py-1 rounded-full">{act.Activity_Hours || 3} ชม.</div>
+                          {getStatusBadge(act.Activity_Status)}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+                        <div className="bg-gray-50 rounded p-2 text-center">
+                          <p className="text-gray-500">วันที่</p>
+                          <p className="font-semibold text-gray-800">{formatDate(act.Activity_Date)}</p>
+                        </div>
+                        <div className="bg-gray-50 rounded p-2 text-center">
+                          <p className="text-gray-500">เวลา</p>
+                          <p className="font-semibold text-gray-800">{act.Activity_Time ? act.Activity_Time.substring(0, 5) + ' น.' : '-'}</p>
+                        </div>
+                        <div className="bg-gray-50 rounded p-2 text-center">
+                          <p className="text-gray-500">สถานที่</p>
+                          <p className="font-semibold text-gray-800 truncate">{act.Activity_Location || '-'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                          <div className={`${fillColor} h-2.5 rounded-full transition-all`} style={{ width: `${fillPercent}%` }}></div>
+                        </div>
+                        <span className="text-xs font-semibold text-gray-700 whitespace-nowrap">{regCount}/{act.Maximum_Capacity} คน ({fillPercent}%)</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>เหลือ {remaining} ที่นั่ง</span>
+                        <span>ปิดรับ: {act.Deadline ? formatDate(act.Deadline) : '-'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </>

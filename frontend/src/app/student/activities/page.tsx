@@ -19,7 +19,7 @@ export default function StudentActivitiesPage() {
   const [registering, setRegistering] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
-  const [sortBy, setSortBy] = useState<'date' | 'participants' | 'type'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'participants' | 'type' | 'hours'>('date');
   const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -84,6 +84,8 @@ export default function StudentActivitiesPage() {
         return (b.Current_Registrations || 0) - (a.Current_Registrations || 0);
       } else if (sortBy === 'type') {
         return (a.Activity_Type_Name || '').localeCompare(b.Activity_Type_Name || '');
+      } else if (sortBy === 'hours') {
+        return (b.Activity_Hours || 0) - (a.Activity_Hours || 0);
       }
       return 0;
     });
@@ -227,6 +229,7 @@ export default function StudentActivitiesPage() {
               {[
                 { key: 'date' as const, label: 'วันที่จัดกิจกรรม' },
                 { key: 'participants' as const, label: 'จำนวนคนเข้าร่วม' },
+                { key: 'hours' as const, label: 'ชั่วโมงกิจกรรม (มากสุด)' },
                 { key: 'type' as const, label: 'ประเภทกิจกรรม' },
               ].map((opt) => (
                 <button

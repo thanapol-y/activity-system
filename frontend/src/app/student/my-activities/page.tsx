@@ -1,43 +1,24 @@
 'use client';
 
-
-
 import React, { useState, useEffect } from 'react';
-
 import { useAuth } from '@/contexts/AuthContext';
-
 import Navbar from '@/components/Navbar';
-
 import Footer from '@/components/Footer';
-
 import { registrationAPI } from '@/lib/api';
-
 import { Registration } from '@/types';
 
-
-
 export default function MyActivitiesPage() {
-
   const { user } = useAuth();
-
   const [registrations, setRegistrations] = useState<Registration[]>([]);
-
   const [loading, setLoading] = useState(true);
-
   const [selectedActivity, setSelectedActivity] = useState<Registration | null>(null);
-
   const [showQRModal, setShowQRModal] = useState(false);
-
   const [showCancelModal, setShowCancelModal] = useState(false);
-
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [qrCode, setQrCode] = useState<string>('');
-
   const [loadingQR, setLoadingQR] = useState(false);
-
   const [cancelling, setCancelling] = useState(false);
-
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
 
@@ -597,37 +578,26 @@ export default function MyActivitiesPage() {
 
 
                         <div className="ml-6 flex flex-col space-y-2">
-
                           <button
-
-                            onClick={() => handleViewQR(registration)}
-
-                            className="px-4 py-2 bg-[#2B4C8C] hover:bg-[#1e3563] text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-
+                            onClick={() => { setSelectedActivity(registration); setShowDetailModal(true); }}
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
                           >
-
-                            QR Code
-
+                            ดูรายละเอียด
                           </button>
-
-
-
+                          <button
+                            onClick={() => handleViewQR(registration)}
+                            className="px-4 py-2 bg-[#2B4C8C] hover:bg-[#1e3563] text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+                          >
+                            QR Code
+                          </button>
                           {!registration.Has_CheckedIn && (
-
                             <button
-
                               onClick={() => handleCancelClick(registration)}
-
                               className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-
                             >
-
                               ยกเลิก
-
                             </button>
-
                           )}
-
                         </div>
 
                       </div>
@@ -739,6 +709,74 @@ export default function MyActivitiesPage() {
       )}
 
 
+
+      {/* Activity Detail Modal */}
+      {showDetailModal && selectedActivity && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-5 rounded-t-lg relative">
+              <h3 className="text-xl font-bold text-white pr-20">{selectedActivity.Activity_Name}</h3>
+              <span className="inline-block mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded-full">
+                {selectedActivity.Activity_Type_Name || 'ทั่วไป'}
+              </span>
+              <div className="absolute top-4 right-4 bg-white rounded-full w-14 h-14 flex flex-col items-center justify-center shadow-lg">
+                <span className="text-[#2B4C8C] font-bold text-lg leading-none">{selectedActivity.Activity_Hours || 3}</span>
+                <span className="text-[#2B4C8C] text-[10px] leading-none">ชั่วโมง</span>
+              </div>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">รายละเอียดกิจกรรม</p>
+                <p className="text-gray-800">{selectedActivity.Activity_Details || 'ไม่มีรายละเอียด'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">วันที่จัดกิจกรรม</p>
+                  <p className="text-gray-800">{selectedActivity.Activity_Date ? formatDate(selectedActivity.Activity_Date) : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">เวลา</p>
+                  <p className="text-gray-800">{selectedActivity.Activity_Time ? formatTime(selectedActivity.Activity_Time) : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">สถานที่</p>
+                  <p className="text-gray-800">{selectedActivity.Activity_Location || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">ชั่วโมงกิจกรรม</p>
+                  <p className="text-gray-800 font-semibold text-[#2B4C8C]">{selectedActivity.Activity_Hours || 3} ชั่วโมง</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">สถานะเช็คอิน</p>
+                  {selectedActivity.Has_CheckedIn ? (
+                    <span className="px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">✓ เข้าร่วมแล้ว</span>
+                  ) : (
+                    <span className="px-3 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">รอเข้าร่วม</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">วันที่ลงทะเบียน</p>
+                  <p className="text-gray-800">{selectedActivity.Registration_Date ? formatDate(selectedActivity.Registration_Date) : '-'}</p>
+                </div>
+              </div>
+              <div className="flex space-x-3 pt-2">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  ปิด
+                </button>
+                <button
+                  onClick={() => { setShowDetailModal(false); handleViewQR(selectedActivity); }}
+                  className="flex-1 px-4 py-2 bg-[#2B4C8C] hover:bg-[#1e3563] text-white rounded-lg transition-colors"
+                >
+                  ดู QR Code
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cancel Confirmation Modal */}
 

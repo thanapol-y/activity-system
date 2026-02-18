@@ -16,6 +16,7 @@ const emptyForm: CreateActivityForm = {
   Activity_Time: '',
   Activity_Location: '',
   Maximum_Capacity: 0,
+  Activity_Hours: 3,
   Deadline: '',
 };
 
@@ -141,6 +142,7 @@ export default function ActivityHeadActivitiesPage() {
       Activity_Time: activity.Activity_Time ? activity.Activity_Time.substring(0, 5) : '',
       Activity_Location: activity.Activity_Location || '',
       Maximum_Capacity: activity.Maximum_Capacity,
+      Activity_Hours: activity.Activity_Hours || 3,
       Deadline: activity.Deadline ? activity.Deadline.substring(0, 16) : '',
     });
     setFormErrors([]);
@@ -224,7 +226,7 @@ export default function ActivityHeadActivitiesPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'Maximum_Capacity' || name === 'Academic_Year' ? Number(value) : value,
+      [name]: name === 'Maximum_Capacity' || name === 'Academic_Year' || name === 'Activity_Hours' ? Number(value) : value,
     }));
   };
 
@@ -521,8 +523,8 @@ export default function ActivityHeadActivitiesPage() {
                   />
                 </div>
 
-                {/* Capacity & Deadline */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Capacity, Hours & Deadline */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       จำนวนผู้เข้าร่วมสูงสุด <span className="text-red-500">*</span>
@@ -542,6 +544,23 @@ export default function ActivityHeadActivitiesPage() {
                         ผู้ลงทะเบียนปัจจุบัน: {editingActivity.Current_Registrations || 0} คน
                       </p>
                     )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ชั่วโมงกิจกรรม <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="Activity_Hours"
+                      value={formData.Activity_Hours || ''}
+                      onChange={handleFormChange}
+                      min={1}
+                      max={24}
+                      placeholder="เช่น 3"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white placeholder:text-gray-400"
+                      required
+                    />
+                    <p className="mt-1 text-xs text-gray-500">จำนวนชั่วโมงที่ได้รับเมื่อเข้าร่วม</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

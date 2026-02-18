@@ -268,6 +268,8 @@ export const getMyRegistrations = async (
         a.Activity_Time,
         a.Activity_Location,
         a.Activity_Status,
+        a.Activity_Hours,
+        a.Maximum_Capacity,
         at.Activity_Type_Name,
         CASE WHEN ci.Student_ID IS NOT NULL THEN 1 ELSE 0 END as Has_CheckedIn,
         ci.CheckIn_Time
