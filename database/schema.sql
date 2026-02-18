@@ -96,6 +96,7 @@ CREATE TABLE activity (
     Activity_Time TIME,
     Activity_Location VARCHAR(100),
     Maximum_Capacity INT,
+    Activity_Hours INT DEFAULT 3,
     Deadline DATETIME,
     Activity_Status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     Dean_ID VARCHAR(20),

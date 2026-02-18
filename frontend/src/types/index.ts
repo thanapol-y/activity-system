@@ -76,6 +76,7 @@ export interface Activity {
   Activity_Time: string;
   Activity_Location: string;
   Maximum_Capacity: number;
+  Activity_Hours?: number;
   Current_Registrations?: number;
   Deadline: string;
   Activity_Status: ActivityStatus;

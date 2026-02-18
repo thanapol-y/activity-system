@@ -291,11 +291,16 @@ export default function StudentActivitiesPage() {
                     onClick={() => { setDetailActivity(activity); setShowDetailModal(true); }}
                   >
                     {/* Activity Header */}
-                    <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-4">
+                    <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-4 relative">
                       <div className="flex items-start justify-between">
-                        <h3 className="text-white font-semibold text-lg line-clamp-2 flex-1">
+                        <h3 className="text-white font-semibold text-lg line-clamp-2 flex-1 pr-16">
                           {activity.Activity_Name}
                         </h3>
+                        {/* Hours Badge */}
+                        <div className="absolute top-3 right-3 bg-white rounded-full w-12 h-12 flex flex-col items-center justify-center shadow-lg">
+                          <span className="text-[#2B4C8C] font-bold text-sm leading-none">{activity.Activity_Hours || 3}</span>
+                          <span className="text-[#2B4C8C] text-[9px] leading-none">ชั่วโมง</span>
+                        </div>
                       </div>
                       <span className="inline-block mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded-full">
                         {activity.Activity_Type_Name || 'ทั่วไป'}
@@ -489,11 +494,16 @@ export default function StudentActivitiesPage() {
       {showDetailModal && detailActivity && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-5 rounded-t-lg">
-              <h3 className="text-xl font-bold text-white">{detailActivity.Activity_Name}</h3>
+            <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-5 rounded-t-lg relative">
+              <h3 className="text-xl font-bold text-white pr-20">{detailActivity.Activity_Name}</h3>
               <span className="inline-block mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded-full">
                 {detailActivity.Activity_Type_Name || 'ทั่วไป'}
               </span>
+              {/* Hours Badge */}
+              <div className="absolute top-4 right-4 bg-white rounded-full w-14 h-14 flex flex-col items-center justify-center shadow-lg">
+                <span className="text-[#2B4C8C] font-bold text-lg leading-none">{detailActivity.Activity_Hours || 3}</span>
+                <span className="text-[#2B4C8C] text-[10px] leading-none">ชั่วโมง</span>
+              </div>
             </div>
             <div className="p-5 space-y-4">
               <div>
@@ -520,6 +530,10 @@ export default function StudentActivitiesPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-500 mb-1">จำนวนผู้เข้าร่วม</p>
                   <p className="text-gray-800">{detailActivity.Current_Registrations || 0} / {detailActivity.Maximum_Capacity} คน</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">ชั่วโมงกิจกรรม</p>
+                  <p className="text-gray-800 font-semibold text-[#2B4C8C]">{detailActivity.Activity_Hours || 3} ชั่วโมง</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 mb-1">หัวหน้ากิจกรรม</p>

@@ -1,7 +1,6 @@
 const mysql = require('mysql2/promise');
 
-async function updateDates() {
-  // Railway MySQL connection - ใช้ข้อมูลจาก Railway Connect tab
+async function migrate() {
   const connection = await mysql.createConnection({
     host: 'tramway.proxy.rlwy.net',
     port: 18061,
@@ -13,52 +12,53 @@ async function updateDates() {
   console.log('Connected to Railway MySQL');
 
   try {
-    // Update Activity dates
-    console.log('Updating activity dates...');
+    // 1. Add Activity_Hours column if not exists
+    console.log('Adding Activity_Hours column...');
+    try {
+      await connection.execute(`
+        ALTER TABLE activity ADD COLUMN Activity_Hours INT DEFAULT 3 AFTER Maximum_Capacity
+      `);
+      console.log('Column added');
+    } catch (e) {
+      if (e.code === 'ER_DUP_FIELDNAME') {
+        console.log('Column already exists, skipping');
+      } else {
+        throw e;
+      }
+    }
+
+    // 2. Set hours for existing activities
+    console.log('Setting hours for existing activities...');
+    await connection.execute(`UPDATE activity SET Activity_Hours = 3 WHERE Activity_ID = 'Act001'`);
+    await connection.execute(`UPDATE activity SET Activity_Hours = 4 WHERE Activity_ID = 'Act002'`);
+    await connection.execute(`UPDATE activity SET Activity_Hours = 6 WHERE Activity_ID = 'Act003'`);
+    console.log('Hours set for Act001-Act003');
+
+    // 3. Delete test/test2 activities (and their registrations/check-ins first)
+    console.log('Deleting test activities...');
     
-    await connection.execute(`
-      UPDATE activity SET 
-        Activity_Date = '2026-01-20',
-        Deadline = '2026-01-19 10:00:00'
-      WHERE Activity_ID = 'Act001'
-    `);
-    console.log('Act001 updated');
+    // Get test activity IDs
+    const [testActs] = await connection.execute(
+      `SELECT Activity_ID FROM activity WHERE Activity_Name LIKE 'test%'`
+    );
+    console.log(`Found ${testActs.length} test activities`);
 
-    await connection.execute(`
-      UPDATE activity SET 
-        Activity_Date = '2026-02-03',
-        Deadline = '2026-02-02 08:00:00'
-      WHERE Activity_ID = 'Act002'
-    `);
-    console.log('Act002 updated');
+    for (const act of testActs) {
+      const id = act.Activity_ID;
+      // Delete check-ins
+      await connection.execute(`DELETE FROM check_in WHERE Activity_ID = ?`, [id]);
+      // Delete registrations
+      await connection.execute(`DELETE FROM registration WHERE Activity_ID = ?`, [id]);
+      // Delete activity assignments
+      try {
+        await connection.execute(`DELETE FROM activity_assignment WHERE Activity_ID = ?`, [id]);
+      } catch (e) { /* table might not exist */ }
+      // Delete activity
+      await connection.execute(`DELETE FROM activity WHERE Activity_ID = ?`, [id]);
+      console.log(`Deleted activity: ${id} (${act.Activity_Name || id})`);
+    }
 
-    await connection.execute(`
-      UPDATE activity SET 
-        Activity_Date = '2026-03-04',
-        Deadline = '2026-02-28 12:00:00'
-      WHERE Activity_ID = 'Act003'
-    `);
-    console.log('Act003 updated');
-
-    // Update registration dates (if year is 2569)
-    console.log('Updating registration dates...');
-    const [regResult] = await connection.execute(`
-      UPDATE registration 
-      SET Registration_Date = DATE_SUB(Registration_Date, INTERVAL 543 YEAR)
-      WHERE YEAR(Registration_Date) = 2569
-    `);
-    console.log(`Registration dates updated: ${regResult.affectedRows} rows`);
-
-    // Update check-in dates (if year is 2569)
-    console.log('Updating check-in dates...');
-    const [checkResult] = await connection.execute(`
-      UPDATE check_in 
-      SET CheckIn_Time = DATE_SUB(CheckIn_Time, INTERVAL 543 YEAR)
-      WHERE YEAR(CheckIn_Time) = 2569
-    `);
-    console.log(`Check-in dates updated: ${checkResult.affectedRows} rows`);
-
-    console.log('\n✅ All dates updated successfully!');
+    console.log('\n\u2705 Migration completed successfully!');
 
   } catch (error) {
     console.error('Error:', error.message);
@@ -67,4 +67,4 @@ async function updateDates() {
   }
 }
 
-updateDates();
+migrate();

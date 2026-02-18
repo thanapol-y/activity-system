@@ -146,6 +146,7 @@ export interface CreateActivityRequest {
   Activity_Time: string;
   Activity_Location: string;
   Maximum_Capacity: number;
+  Activity_Hours: number;
   Deadline: string;
   Activity_Head_ID: string;
 }
@@ -158,6 +159,7 @@ export interface UpdateActivityRequest {
   Activity_Time?: string;
   Activity_Location?: string;
   Maximum_Capacity?: number;
+  Activity_Hours?: number;
   Deadline?: string;
 }
 

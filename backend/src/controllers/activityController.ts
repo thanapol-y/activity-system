@@ -47,6 +47,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
       Activity_Time,
       Activity_Location,
       Maximum_Capacity,
+      Activity_Hours,
       Deadline,
     } = req.body as CreateActivityRequest;
 
@@ -83,8 +84,8 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
       `INSERT INTO activity (
         Activity_ID, Activity_Name, Activity_Details, Academic_Year,
         Activity_Type_ID, Activity_Date, Activity_Time, Activity_Location,
-        Maximum_Capacity, Deadline, Activity_Status, Activity_Head_ID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        Maximum_Capacity, Activity_Hours, Deadline, Activity_Status, Activity_Head_ID
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         Activity_ID,
         Activity_Name,
@@ -95,6 +96,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
         Activity_Time,
         Activity_Location,
         Maximum_Capacity,
+        Activity_Hours || 3,
         Deadline,
         ActivityStatus.PENDING,
         req.user.userId,

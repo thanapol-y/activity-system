@@ -172,10 +172,9 @@ export default function LoginPage() {
                 className="rounded-full shadow-md"
               />
             </div>
-            <h1 className="text-xl font-bold text-gray-800 mb-1">
-              ระบบลงทะเบียนเข้าร่วมกิจกรรม
-            </h1>
-            <p className="text-sm text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
+            <h3 className="text-xl font-bold text-gray-800 mb-1">
+              กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน
+            </h3>
           </div>
 
           {/* Error Message */}
