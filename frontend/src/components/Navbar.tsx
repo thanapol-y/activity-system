@@ -31,6 +31,7 @@ export default function Navbar() {
           { label: 'หน้าหลัก', href: '/dean/dashboard' },
           { label: 'อนุมัติกิจกรรม', href: '/dean/approve' },
           { label: 'ประวัติการอนุมัติ', href: '/dean/history' },
+          { label: 'สรุปภาพรวม', href: '/dean/summary' },
         ];
       case UserRole.ACTIVITY_HEAD:
         return [
