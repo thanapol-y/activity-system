@@ -167,14 +167,12 @@ export default function LoginPage() {
               <img
                 src="/logo.png"
                 alt="BUS RMUTP Logo"
-                width={80}
-                height={80}
+                width={150}
+                height={150}
                 className="rounded-full shadow-md"
               />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-1">
-              กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน
-            </h3>
+            <p className="text-sm text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
           </div>
 
           {/* Error Message */}

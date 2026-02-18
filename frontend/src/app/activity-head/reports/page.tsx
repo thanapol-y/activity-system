@@ -246,7 +246,7 @@ export default function ActivityHeadReportsPage() {
 
             {/* All Activities - Detail Cards */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">ภาพรวมกิจกรรมทั้งหมด (กวาดตาครั้งเดียว)</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">ภาพรวมกิจกรรมทั้งหมด</h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {activities.map((act) => {
                   const regCount = act.Current_Registrations || 0;
