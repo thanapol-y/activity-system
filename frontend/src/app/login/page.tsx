@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types";
 
@@ -165,7 +164,7 @@ export default function LoginPage() {
           {/* Header with Logo */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <Image
+              <img
                 src="/logo.png"
                 alt="BUS RMUTP Logo"
                 width={80}

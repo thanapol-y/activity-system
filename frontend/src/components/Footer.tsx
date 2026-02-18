@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,7 +13,7 @@ export default function Footer() {
           {/* About Section */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-full" />
+              <img src="/logo.png" alt="Logo" width={40} height={40} className="rounded-full" />
               <h3 className="text-white font-semibold text-lg">ระบบลงทะเบียนเข้าร่วมกิจกรรม</h3>
             </div>
             <p className="text-sm leading-relaxed">
