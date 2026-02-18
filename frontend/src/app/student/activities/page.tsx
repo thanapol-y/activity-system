@@ -19,6 +19,9 @@ export default function StudentActivitiesPage() {
   const [registering, setRegistering] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<'date' | 'participants' | 'type'>('date');
+  const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     loadActivities();
@@ -27,7 +30,7 @@ export default function StudentActivitiesPage() {
 
   useEffect(() => {
     filterActivities();
-  }, [searchTerm, selectedType, activities]);
+  }, [searchTerm, selectedType, activities, sortBy]);
 
   const loadActivities = async () => {
     try {
@@ -73,6 +76,18 @@ export default function StudentActivitiesPage() {
       filtered = filtered.filter((activity) => activity.Activity_Type_ID === selectedType);
     }
 
+    // Sort
+    filtered.sort((a, b) => {
+      if (sortBy === 'date') {
+        return new Date(a.Activity_Date).getTime() - new Date(b.Activity_Date).getTime();
+      } else if (sortBy === 'participants') {
+        return (b.Current_Registrations || 0) - (a.Current_Registrations || 0);
+      } else if (sortBy === 'type') {
+        return (a.Activity_Type_Name || '').localeCompare(b.Activity_Type_Name || '');
+      }
+      return 0;
+    });
+
     setFilteredActivities(filtered);
   };
 
@@ -87,7 +102,7 @@ export default function StudentActivitiesPage() {
     try {
       setRegistering(true);
       await registrationAPI.register(selectedActivity.Activity_ID);
-      setMessage({ type: 'success', text: 'ลงทะเบียนสำเร็จ!' });
+      setMessage({ type: 'success', text: 'เข้าร่วมกิจกรรมสำเร็จ!' });
       setShowModal(false);
       setRegisteredIds(prev => new Set(prev).add(selectedActivity.Activity_ID));
       loadActivities();
@@ -137,7 +152,7 @@ export default function StudentActivitiesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">กิจกรรมทั้งหมด</h1>
-          <p className="text-gray-600">ค้นหาและลงทะเบียนกิจกรรมที่คุณสนใจ</p>
+          <p className="text-gray-600">ค้นหาและเลือกเข้าร่วมกิจกรรมที่คุณสนใจ กดที่การ์ดกิจกรรมเพื่อดูรายละเอียด</p>
         </div>
 
         {/* Message Alert */}
@@ -205,14 +220,39 @@ export default function StudentActivitiesPage() {
             </div>
           </div>
 
+          {/* Sort Options */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">เรียงตาม</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: 'date' as const, label: 'วันที่จัดกิจกรรม' },
+                { key: 'participants' as const, label: 'จำนวนคนเข้าร่วม' },
+                { key: 'type' as const, label: 'ประเภทกิจกรรม' },
+              ].map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setSortBy(opt.key)}
+                  className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    sortBy === opt.key
+                      ? 'bg-[#2B4C8C] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <button
             onClick={() => {
               setSearchTerm('');
               setSelectedType('');
+              setSortBy('date');
             }}
-            className="mt-4 text-sm text-[#2B4C8C] hover:underline"
+            className="mt-3 text-sm text-[#2B4C8C] hover:underline"
           >
-            ล้างตัวกรอง
+            ล้างตัวกรองทั้งหมด
           </button>
         </div>
 
@@ -247,13 +287,16 @@ export default function StudentActivitiesPage() {
                 {filteredActivities.map((activity) => (
                   <div
                     key={activity.Activity_ID}
-                    className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden"
+                    className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden cursor-pointer"
+                    onClick={() => { setDetailActivity(activity); setShowDetailModal(true); }}
                   >
                     {/* Activity Header */}
                     <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-4">
-                      <h3 className="text-white font-semibold text-lg line-clamp-2">
-                        {activity.Activity_Name}
-                      </h3>
+                      <div className="flex items-start justify-between">
+                        <h3 className="text-white font-semibold text-lg line-clamp-2 flex-1">
+                          {activity.Activity_Name}
+                        </h3>
+                      </div>
                       <span className="inline-block mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded-full">
                         {activity.Activity_Type_Name || 'ทั่วไป'}
                       </span>
@@ -364,14 +407,14 @@ export default function StudentActivitiesPage() {
                           disabled
                           className="w-full bg-gray-400 text-white font-medium py-2 px-4 rounded-lg cursor-not-allowed"
                         >
-                          ✓ ลงทะเบียนแล้ว
+                          ✓ เข้าร่วมแล้ว
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleRegister(activity)}
+                          onClick={(e) => { e.stopPropagation(); handleRegister(activity); }}
                           className="w-full bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-4 rounded-lg transition-colors"
                         >
-                          ลงทะเบียน
+                          เข้าร่วม
                         </button>
                       )}
                     </div>
@@ -434,8 +477,71 @@ export default function StudentActivitiesPage() {
                   disabled={registering}
                   className="flex-1 px-4 py-2 bg-[#28A745] hover:bg-[#218838] text-white rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {registering ? 'กำลังลงทะเบียน...' : 'ยืนยัน'}
+                  {registering ? 'กำลังเข้าร่วม...' : 'ยืนยันเข้าร่วม'}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Activity Detail Modal */}
+      {showDetailModal && detailActivity && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] p-5 rounded-t-lg">
+              <h3 className="text-xl font-bold text-white">{detailActivity.Activity_Name}</h3>
+              <span className="inline-block mt-2 px-3 py-1 bg-white/20 text-white text-xs rounded-full">
+                {detailActivity.Activity_Type_Name || 'ทั่วไป'}
+              </span>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">รายละเอียดกิจกรรม</p>
+                <p className="text-gray-800">{detailActivity.Activity_Details || 'ไม่มีรายละเอียด'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">วันที่จัดกิจกรรม</p>
+                  <p className="text-gray-800">{formatDate(detailActivity.Activity_Date)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">เวลา</p>
+                  <p className="text-gray-800">{formatTime(detailActivity.Activity_Time)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">สถานที่</p>
+                  <p className="text-gray-800">{detailActivity.Activity_Location || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">ปิดรับลงทะเบียน</p>
+                  <p className="text-gray-800">{detailActivity.Deadline ? formatDate(detailActivity.Deadline) : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">จำนวนผู้เข้าร่วม</p>
+                  <p className="text-gray-800">{detailActivity.Current_Registrations || 0} / {detailActivity.Maximum_Capacity} คน</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-1">หัวหน้ากิจกรรม</p>
+                  <p className="text-gray-800">{detailActivity.Activity_Head_Name || '-'}</p>
+                </div>
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  ปิด
+                </button>
+                {!registeredIds.has(detailActivity.Activity_ID) && (
+                  <button
+                    onClick={() => { setShowDetailModal(false); handleRegister(detailActivity); }}
+                    className="flex-1 px-4 py-2 bg-[#28A745] hover:bg-[#218838] text-white rounded-lg transition-colors"
+                  >
+                    เข้าร่วมกิจกรรมนี้
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -44,9 +44,8 @@ export default function Navbar() {
         return [
           { label: 'หน้าหลัก', href: '/club/dashboard' },
           { label: 'สแกน QR', href: '/club/scan' },
-          { label: 'รายชื่อ', href: '/club/registrations' },
           { label: 'ประวัติเช็คอิน', href: '/club/history' },
-          { label: 'รายงาน', href: '/club/reports' },
+          { label: 'รายงานปัญหา', href: '/club/reports' },
         ];
       case UserRole.STUDENT:
         return [

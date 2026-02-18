@@ -82,7 +82,7 @@ export default function ActivityHeadDashboardPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard หัวหน้ากิจกรรม</h1>
-            <p className="text-gray-600">จัดการกิจกรรมและติดตามสถานะการเข้าร่วม</p>
+            <p className="text-gray-600">กดปุ่ม "สร้างกิจกรรม" เพื่อเพิ่มกิจกรรมใหม่ หรือดูรายชื่อผู้ลงทะเบียนและรายงานปัญหาได้ที่เมนูด้านบน</p>
           </div>
           <Link
             href="/activity-head/activities"

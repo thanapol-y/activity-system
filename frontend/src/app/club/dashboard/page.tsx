@@ -62,7 +62,7 @@ export default function ClubDashboardPage() {
               Dashboard สโมสรนักศึกษา
             </h1>
             <p className="text-gray-600">
-              จัดการการเช็คอินและติดตามกิจกรรมที่ได้รับมอบหมาย
+              ยินดีต้อนรับ {user?.name || ''} กดปุ่ม "สแกน QR" เพื่อเช็คอินนักศึกษา หรือดูประวัติเช็คอินได้ที่เมนูด้านบน
             </p>
           </div>
           <Link

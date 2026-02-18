@@ -97,7 +97,7 @@ export default function DeanApprovePage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">อนุมัติกิจกรรม</h1>
-          <p className="text-gray-600">ตรวจสอบและอนุมัติกิจกรรมที่หัวหน้ากิจกรรมเสนอ</p>
+          <p className="text-gray-600">ตรวจสอบรายละเอียดแล้วกดปุ่ม "อนุมัติ" หรือ "ปฏิเสธ" เพื่อดำเนินการกับกิจกรรมที่รออยู่</p>
         </div>
 
         {/* Message */}

@@ -58,7 +58,7 @@ export default function AdminDashboardPage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
-          <p className="text-gray-600">ภาพรวมระบบและการจัดการผู้ใช้ทั้งหมด</p>
+          <p className="text-gray-600">ภาพรวมข้อมูลระบบทั้งหมด กดเมนู "จัดการผู้ใช้" ด้านบนเพื่อเพิ่ม/แก้ไข/ลบผู้ใช้งานทุก Role</p>
         </div>
 
         {loading ? (

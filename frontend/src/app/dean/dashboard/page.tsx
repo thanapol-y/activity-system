@@ -65,8 +65,8 @@ export default function DeanDashboardPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
-          <p className="text-gray-600">ดูภาพรวมกิจกรรมและสถิติของระบบ</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard รองคณบดี</h1>
+          <p className="text-gray-600">ภาพรวมสถิติกิจกรรมทั้งหมด กดเมนู "อนุมัติกิจกรรม" ด้านบนเพื่ออนุมัติหรือปฏิเสธกิจกรรมที่หัวหน้ากิจกรรมเสนอมา</p>
         </div>
 
         {loading ? (
