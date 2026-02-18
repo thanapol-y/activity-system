@@ -167,8 +167,8 @@ export default function LoginPage() {
               <img
                 src="/logo.png"
                 alt="BUS RMUTP Logo"
-                width={150}
-                height={150}
+                width={250}
+                height={250}
                 className="rounded-full shadow-md"
               />
             </div>
