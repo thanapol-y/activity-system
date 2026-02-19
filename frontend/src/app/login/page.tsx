@@ -109,7 +109,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#2B4C8C] to-[#3B5998] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#2B4C8C] to-[#3B5998] flex flex-col px-4 py-6">
       {/* Quick Login Button (hamburger) */}
       <button
         onClick={() => setShowQuickLogin(!showQuickLogin)}
@@ -158,24 +158,24 @@ export default function LoginPage() {
         </div>
       )}
 
-      <div className="w-full max-w-md lg:max-w-lg">
+      <div className="w-full max-w-md lg:max-w-lg m-auto">
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-8">
           {/* Header with Logo */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
+          <div className="text-center mb-4 sm:mb-6">
+            <div className="flex justify-center mb-3 sm:mb-4">
               <img
                 src="/logo2.png"
                 alt="คณะบริหารธุรกิจ มทร.พระนคร"
                 width={160}
                 height={160}
-                className="object-contain drop-shadow-md w-28 h-28 sm:w-40 sm:h-40"
+                className="object-contain drop-shadow-md w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36"
               />
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
               ระบบกิจกรรมนักศึกษา มทร.พระนคร
             </h3>
-            <p className="text-sm text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
+            <p className="text-xs sm:text-sm text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
           </div>
 
           {/* Error Message */}
@@ -186,7 +186,7 @@ export default function LoginPage() {
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {/* Role Selection */}
             <div>
               <label
@@ -200,7 +200,7 @@ export default function LoginPage() {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none transition-all text-gray-900 bg-white"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none transition-all text-gray-900 bg-white"
                 disabled={isLoading}
               >
                 {roleOptions.map((option) => (
@@ -230,7 +230,7 @@ export default function LoginPage() {
                 value={formData.userId}
                 onChange={handleChange}
                 placeholder={getUserIdPlaceholder()}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none transition-all text-gray-900 bg-white placeholder:text-gray-400"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none transition-all text-gray-900 bg-white placeholder:text-gray-400"
                 disabled={isLoading}
                 autoComplete="username"
               />
@@ -251,7 +251,7 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="กรอกรหัสผ่าน"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none transition-all text-gray-900 bg-white placeholder:text-gray-400"
+                className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none transition-all text-gray-900 bg-white placeholder:text-gray-400"
                 disabled={isLoading}
                 autoComplete="current-password"
               />
@@ -261,7 +261,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#2B4C8C] hover:bg-[#1e3563] text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-[#2B4C8C] hover:bg-[#1e3563] text-white font-medium py-2.5 sm:py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isLoading ? (
                 <>
@@ -295,7 +295,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer Text */}
-        <div className="mt-6 text-center text-sm text-white/80 space-y-3">
+        <div className="mt-4 sm:mt-6 text-center text-sm text-white/80 space-y-2 sm:space-y-3">
           <p className="font-medium text-white/90">พบปัญหาการใช้งาน? ติดต่อเจ้าหน้าที่กิจกรรมนักศึกษาได้ในวันและเวลาราชการ</p>
           <div className="flex flex-col items-center gap-1.5">
             <div className="flex items-center gap-2">
