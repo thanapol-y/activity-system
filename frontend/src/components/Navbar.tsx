@@ -90,7 +90,7 @@ export default function Navbar() {
               alt="Logo"
               width={50}
               height={50}
-              className="object-contain drop-shadow-sm brightness-0 invert"
+              className="object-contain drop-shadow-sm"
             />
             <div className="text-xl font-bold">
               ระบบลงทะเบียนเข้าร่วมกิจกรรม
