@@ -80,7 +80,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] text-white shadow-lg">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Bar */}
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo/Title */}

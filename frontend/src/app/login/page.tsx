@@ -158,7 +158,7 @@ export default function LoginPage() {
         </div>
       )}
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md lg:max-w-lg">
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
           {/* Header with Logo */}

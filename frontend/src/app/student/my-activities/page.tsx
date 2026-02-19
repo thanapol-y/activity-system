@@ -221,7 +221,7 @@ export default function MyActivitiesPage() {
 
 
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Header */}
 
