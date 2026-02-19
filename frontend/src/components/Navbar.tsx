@@ -88,9 +88,9 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="Logo"
-              width={50}
-              height={50}
-              className="rounded-full border-2 border-white/30 shadow-sm"
+              width={44}
+              height={44}
+              className="object-contain drop-shadow-sm brightness-0 invert"
             />
             <div className="text-xl font-bold">
               ระบบลงทะเบียนเข้าร่วมกิจกรรม
