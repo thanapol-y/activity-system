@@ -13,7 +13,7 @@ export default function Footer() {
           {/* About Section */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="Logo" width={50} height={50} className="rounded-full" />
+              <img src="/logo.png" alt="Logo" width={100} height={100} className="rounded-full" />
               <h3 className="text-white font-semibold text-lg">ระบบลงทะเบียนเข้าร่วมกิจกรรม</h3>
             </div>
             <p className="text-sm leading-relaxed">

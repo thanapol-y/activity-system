@@ -88,8 +88,8 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="Logo"
-              width={50}
-              height={50}
+              width={100}
+              height={100}
               className="object-contain drop-shadow-sm"
             />
             <div className="text-xl font-bold">
