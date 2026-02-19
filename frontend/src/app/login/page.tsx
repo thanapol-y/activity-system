@@ -30,6 +30,7 @@ export default function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [showQuickLogin, setShowQuickLogin] = useState(false);
 
   const roleOptions = [
@@ -46,6 +47,7 @@ export default function LoginPage() {
 
     if (!formData.userId || !formData.password) {
       setError("กรุณากรอกข้อมูลให้ครบถ้วน");
+      setShowErrorModal(true);
       return;
     }
 
@@ -57,6 +59,7 @@ export default function LoginPage() {
           ? err.message
           : "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
       );
+      setShowErrorModal(true);
     }
   };
 
@@ -89,6 +92,7 @@ export default function LoginPage() {
 
   const handleQuickLogin = async (account: typeof quickAccounts[0]) => {
     setError('');
+    setShowErrorModal(false);
     setShowQuickLogin(false);
     try {
       await login(account.userId, account.password, account.role);
@@ -110,6 +114,37 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2B4C8C] to-[#3B5998] flex flex-col px-4 py-6">
+
+      {/* Error Modal Popup */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={() => setShowErrorModal(false)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto p-6 text-center animate-bounce-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <svg className="w-9 h-9 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+              </div>
+            </div>
+            {/* Title */}
+            <h3 className="text-lg font-bold text-gray-800 mb-2">เข้าสู่ระบบไม่สำเร็จ</h3>
+            {/* Message */}
+            <p className="text-gray-600 text-sm mb-6">{error}</p>
+            {/* Close Button */}
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition-colors text-base"
+            >
+              ตกลง
+            </button>
+          </div>
+        </div>
+      )}
       {/* Quick Login Button (hamburger) */}
       <button
         onClick={() => setShowQuickLogin(!showQuickLogin)}
@@ -178,12 +213,6 @@ export default function LoginPage() {
             <p className="text-xs sm:text-sm text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600 text-center">{error}</p>
-            </div>
-          )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
