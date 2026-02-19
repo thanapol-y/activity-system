@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -36,14 +36,31 @@ export default function StudentHistoryPage() {
     return new Date(dateString).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const isCheckedIn = (r: Registration) => Boolean(Number(r.Has_CheckedIn));
+
   const filtered = registrations.filter((r) => {
-    if (filter === 'attended') return r.Has_CheckedIn;
-    if (filter === 'missed') return !r.Has_CheckedIn;
+    if (filter === 'attended') return isCheckedIn(r);
+    if (filter === 'missed') return !isCheckedIn(r);
     return true;
   });
 
-  const attendedCount = registrations.filter((r) => r.Has_CheckedIn).length;
-  const missedCount = registrations.filter((r) => !r.Has_CheckedIn).length;
+  const attendedCount = registrations.filter((r) => isCheckedIn(r)).length;
+  const missedCount = registrations.filter((r) => !isCheckedIn(r)).length;
+
+  const attendedRegs = registrations.filter((r) => isCheckedIn(r));
+  const totalAttendedHours = attendedRegs.reduce((sum, r) => sum + (r.Activity_Hours || 0), 0);
+
+  const hoursByType = useMemo(() => {
+    const map = new Map<string, { name: string; hours: number; count: number }>();
+    attendedRegs.forEach((r) => {
+      const typeName = r.Activity_Type_Name || 'ทั่วไป';
+      const existing = map.get(typeName) || { name: typeName, hours: 0, count: 0 };
+      existing.hours += r.Activity_Hours || 0;
+      existing.count++;
+      map.set(typeName, existing);
+    });
+    return Array.from(map.values()).sort((a, b) => b.hours - a.hours);
+  }, [attendedRegs]);
 
   if (!user) return null;
 
@@ -53,24 +70,52 @@ export default function StudentHistoryPage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">ประวัติการเข้าร่วมกิจกรรม</h1>
-          <p className="text-gray-600">ดูสถานะการเข้าร่วมกิจกรรมทั้งหมด สีเขียว = เข้าร่วมแล้ว, สีแดง = ยังไม่ได้เข้าร่วม กดปุ่มด้านบนเพื่อกรองข้อมูลได้</p>
+          <p className="text-gray-600">ดูสถานะการเข้าร่วมกิจกรรมทั้งหมด สีเขียว = เข้าร่วมแล้ว, สีแดง = ยังไม่ได้เข้าร่วม</p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-            <p className="text-sm text-gray-500">ทั้งหมด</p>
+            <p className="text-sm text-gray-500">ลงทะเบียนทั้งหมด</p>
             <p className="text-2xl font-bold text-[#2B4C8C]">{registrations.length}</p>
+            <p className="text-xs text-gray-400">กิจกรรม</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4 text-center">
             <p className="text-sm text-gray-500">เข้าร่วมแล้ว</p>
             <p className="text-2xl font-bold text-green-600">{attendedCount}</p>
+            <p className="text-xs text-gray-400">กิจกรรม</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4 text-center">
             <p className="text-sm text-gray-500">ไม่ได้เข้าร่วม</p>
             <p className="text-2xl font-bold text-red-600">{missedCount}</p>
+            <p className="text-xs text-gray-400">กิจกรรม</p>
+          </div>
+          <div className="bg-gradient-to-br from-[#2B4C8C] to-[#3B5998] rounded-lg shadow-sm p-4 text-center text-white">
+            <p className="text-sm opacity-80">ชั่วโมงกิจกรรมรวม</p>
+            <p className="text-2xl font-bold">{totalAttendedHours}</p>
+            <p className="text-xs opacity-70">ชั่วโมง (เฉพาะที่เข้าร่วม)</p>
           </div>
         </div>
+
+        {/* Hours by Activity Type */}
+        {!loading && hoursByType.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-5 mb-6">
+            <h3 className="text-base font-semibold text-gray-800 mb-4">ชั่วโมงกิจกรรมแยกตามประเภท</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {hoursByType.map((t) => (
+                <div key={t.name} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="w-12 h-12 bg-[#2B4C8C] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-lg font-bold">{t.hours}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{t.name}</p>
+                    <p className="text-xs text-gray-500">{t.count} กิจกรรม · {t.hours} ชั่วโมง</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Filter */}
         <div className="flex gap-2 mb-6">
@@ -108,22 +153,30 @@ export default function StudentHistoryPage() {
               <div key={`${reg.Activity_ID}-${reg.Student_ID}`} className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800">{reg.Activity_Name}</h3>
-                    <div className="mt-2 space-y-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-800">{reg.Activity_Name}</h3>
+                      {reg.Activity_Hours ? (
+                        <span className="bg-[#2B4C8C] text-white text-xs font-bold px-2 py-0.5 rounded-full">{reg.Activity_Hours} ชม.</span>
+                      ) : null}
+                    </div>
+                    <div className="mt-1 space-y-1 text-sm text-gray-600">
+                      {reg.Activity_Type_Name && (
+                        <p className="text-xs text-[#2B4C8C] font-medium">{reg.Activity_Type_Name}</p>
+                      )}
                       <p>วันที่: {formatDate(reg.Activity_Date)}</p>
                       {reg.Activity_Location && <p>สถานที่: {reg.Activity_Location}</p>}
                       <p>ลงทะเบียนเมื่อ: {formatDate(reg.Registration_Date)}</p>
-                      {reg.Has_CheckedIn && reg.CheckIn_Time && (
+                      {isCheckedIn(reg) && reg.CheckIn_Time && (
                         <p className="text-green-600">เช็คอินเมื่อ: {formatDate(reg.CheckIn_Time)}</p>
                       )}
                     </div>
                   </div>
-                  <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    reg.Has_CheckedIn
+                  <span className={`px-3 py-1 text-xs font-medium rounded-full flex-shrink-0 ${
+                    isCheckedIn(reg)
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {reg.Has_CheckedIn ? 'เข้าร่วมแล้ว' : 'ไม่ได้เข้าร่วม'}
+                    {isCheckedIn(reg) ? 'เข้าร่วมแล้ว' : 'ไม่ได้เข้าร่วม'}
                   </span>
                 </div>
               </div>
