@@ -173,7 +173,7 @@ export default function LoginPage() {
               />
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-1">
-              ระบบกิจกรรมนักศึกษา
+              ระบบกิจกรรมนักศึกษา มทร.พระนคร
             </h3>
             <p className="text-m text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
           </div>
