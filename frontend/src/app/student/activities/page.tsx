@@ -230,7 +230,6 @@ export default function StudentActivitiesPage() {
                 { key: 'date' as const, label: 'วันที่จัดกิจกรรม' },
                 { key: 'participants' as const, label: 'จำนวนคนเข้าร่วม' },
                 { key: 'hours' as const, label: 'ชั่วโมงกิจกรรม (มากสุด)' },
-                { key: 'type' as const, label: 'ประเภทกิจกรรม' },
               ].map((opt) => (
                 <button
                   key={opt.key}

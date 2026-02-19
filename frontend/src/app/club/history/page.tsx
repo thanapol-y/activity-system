@@ -114,10 +114,6 @@ export default function ClubHistoryPage() {
             <p className="text-sm text-gray-500">กิจกรรมทั้งหมด</p>
             <p className="text-2xl font-bold text-green-600">{new Set(allCheckins.map(c => c.Activity_ID)).size}</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-            <p className="text-sm text-gray-500">ผลการค้นหา</p>
-            <p className="text-2xl font-bold text-purple-600">{displayed.length}</p>
-          </div>
         </div>
 
         {/* Search & Sort */}
