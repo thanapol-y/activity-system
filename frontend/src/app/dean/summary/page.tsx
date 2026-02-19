@@ -115,7 +115,7 @@ export default function DeanSummaryPage() {
         ) : (
           <>
             {/* KPI Row 1: Key Numbers */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-blue-500">
                 <p className="text-xs text-gray-500 mb-1">กิจกรรมทั้งหมด</p>
                 <p className="text-2xl font-bold text-gray-800">{totalActivities}</p>
@@ -131,14 +131,6 @@ export default function DeanSummaryPage() {
               <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-red-500">
                 <p className="text-xs text-gray-500 mb-1">ไม่อนุมัติ</p>
                 <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-purple-500">
-                <p className="text-xs text-gray-500 mb-1">ชม.กิจกรรมรวม</p>
-                <p className="text-2xl font-bold text-purple-600">{totalHours}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-indigo-500">
-                <p className="text-xs text-gray-500 mb-1">ที่นั่งรวม</p>
-                <p className="text-2xl font-bold text-indigo-600">{totalCapacity.toLocaleString()}</p>
               </div>
             </div>
 

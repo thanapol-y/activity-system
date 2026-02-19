@@ -30,7 +30,7 @@ export default function StudentActivitiesPage() {
 
   useEffect(() => {
     filterActivities();
-  }, [searchTerm, selectedType, activities, sortBy]);
+  }, [searchTerm, selectedType, activities, sortBy, registeredIds]);
 
   const loadActivities = async () => {
     try {
@@ -62,7 +62,7 @@ export default function StudentActivitiesPage() {
   };
 
   const filterActivities = () => {
-    let filtered = [...activities];
+    let filtered = activities.filter((activity) => !registeredIds.has(activity.Activity_ID));
 
     if (searchTerm) {
       filtered = filtered.filter(
@@ -407,19 +407,25 @@ export default function StudentActivitiesPage() {
                       </div>
                     </div>
 
-                    {/* Action Button */}
-                    <div className="p-4 pt-0">
+                    {/* Action Buttons */}
+                    <div className="p-4 pt-0 flex gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDetailActivity(activity); setShowDetailModal(true); }}
+                        className="flex-1 border border-[#2B4C8C] text-[#2B4C8C] font-medium py-2 px-4 rounded-lg hover:bg-[#2B4C8C]/5 transition-colors"
+                      >
+                        รายละเอียด
+                      </button>
                       {registeredIds.has(activity.Activity_ID) ? (
                         <button
                           disabled
-                          className="w-full bg-gray-400 text-white font-medium py-2 px-4 rounded-lg cursor-not-allowed"
+                          className="flex-1 bg-gray-400 text-white font-medium py-2 px-4 rounded-lg cursor-not-allowed"
                         >
                           ✓ เข้าร่วมแล้ว
                         </button>
                       ) : (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleRegister(activity); }}
-                          className="w-full bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                          className="flex-1 bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-4 rounded-lg transition-colors"
                         >
                           เข้าร่วม
                         </button>
@@ -440,22 +446,30 @@ export default function StudentActivitiesPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">ยืนยันการลงทะเบียน</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">ยืนยันการเข้าร่วมกิจกรรม</h3>
 
               <div className="space-y-3 mb-6">
                 <div>
                   <label className="text-sm font-medium text-gray-500">ชื่อกิจกรรม</label>
-                  <p className="text-gray-800">{selectedActivity.Activity_Name}</p>
+                  <p className="text-gray-800 font-semibold">{selectedActivity.Activity_Name}</p>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-500">วันที่</label>
-                  <p className="text-gray-800">{formatDate(selectedActivity.Activity_Date)}</p>
-                </div>
+                {selectedActivity.Activity_Details && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">รายละเอียด</label>
+                    <p className="text-gray-800">{selectedActivity.Activity_Details}</p>
+                  </div>
+                )}
 
-                <div>
-                  <label className="text-sm font-medium text-gray-500">เวลา</label>
-                  <p className="text-gray-800">{formatTime(selectedActivity.Activity_Time)}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">วันที่จัด</label>
+                    <p className="text-gray-800">{formatDate(selectedActivity.Activity_Date)}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">เวลา</label>
+                    <p className="text-gray-800">{formatTime(selectedActivity.Activity_Time)}</p>
+                  </div>
                 </div>
 
                 <div>
@@ -463,12 +477,36 @@ export default function StudentActivitiesPage() {
                   <p className="text-gray-800">{selectedActivity.Activity_Location}</p>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-500">จำนวนผู้เข้าร่วม</label>
-                  <p className="text-gray-800">
-                    {selectedActivity.Current_Registrations || 0} / {selectedActivity.Maximum_Capacity} คน
-                  </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">ประเภทกิจกรรม</label>
+                    <p className="text-gray-800">{selectedActivity.Activity_Type_Name || 'ทั่วไป'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">ชั่วโมงกิจกรรม</label>
+                    <p className="text-gray-800 font-semibold text-[#2B4C8C]">{selectedActivity.Activity_Hours || 3} ชั่วโมง</p>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">จำนวนผู้เข้าร่วม</label>
+                    <p className="text-gray-800">
+                      {selectedActivity.Current_Registrations || 0} / {selectedActivity.Maximum_Capacity} คน
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">ปิดรับลงทะเบียน</label>
+                    <p className="text-gray-800">{selectedActivity.Deadline ? formatDate(selectedActivity.Deadline) : '-'}</p>
+                  </div>
+                </div>
+
+                {selectedActivity.Activity_Head_Name && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">หัวหน้ากิจกรรม</label>
+                    <p className="text-gray-800">{selectedActivity.Activity_Head_Name}</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex space-x-3">

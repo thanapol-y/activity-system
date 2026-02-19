@@ -160,25 +160,25 @@ export default function DeanApprovePage() {
                         <p className="text-gray-600 text-sm mb-4 line-clamp-2">{activity.Activity_Details}</p>
                       )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span className="text-gray-700">{formatDate(activity.Activity_Date)}</span>
+                          <span className="text-gray-700">วันจัด: {formatDate(activity.Activity_Date)}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="text-gray-700">{formatTime(activity.Activity_Time)}</span>
+                          <span className="text-gray-700">เวลา: {formatTime(activity.Activity_Time)}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span className="text-gray-700">{activity.Activity_Location}</span>
+                          <span className="text-gray-700">สถานที่: {activity.Activity_Location}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,7 +186,22 @@ export default function DeanApprovePage() {
                           </svg>
                           <span className="text-gray-700">รับ {activity.Maximum_Capacity} คน</span>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-purple-700 font-semibold">{activity.Activity_Hours || 3} ชั่วโมงกิจกรรม</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                          </svg>
+                          <span className="text-gray-700">ประเภท: {activity.Activity_Type_Name || 'ทั่วไป'}</span>
+                        </div>
                       </div>
+                      {activity.Deadline && (
+                        <p className="mt-2 text-xs text-orange-600 font-medium">ปิดรับลงทะเบียน: {formatDate(activity.Deadline)}</p>
+                      )}
 
                       {activity.Activity_Head_Name && (
                         <p className="mt-3 text-xs text-gray-500">
@@ -249,7 +264,7 @@ export default function DeanApprovePage() {
                 )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">วันที่</label>
+                    <label className="text-sm font-medium text-gray-500">วันที่จัดกิจกรรม</label>
                     <p className="text-gray-800">{formatDate(selectedActivity.Activity_Date)}</p>
                   </div>
                   <div>
@@ -267,14 +282,26 @@ export default function DeanApprovePage() {
                     <p className="text-gray-800">{selectedActivity.Maximum_Capacity} คน</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">ประเภท</label>
+                    <label className="text-sm font-medium text-gray-500">ประเภทกิจกรรม</label>
                     <p className="text-gray-800">{selectedActivity.Activity_Type_Name || 'ทั่วไป'}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">ชั่วโมงกิจกรรม</label>
+                    <p className="text-gray-800 font-semibold text-[#2B4C8C]">{selectedActivity.Activity_Hours || 3} ชั่วโมง</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">ปิดรับลงทะเบียน</label>
+                    <p className="text-gray-800">{selectedActivity.Deadline ? formatDate(selectedActivity.Deadline) : '-'}</p>
                   </div>
                 </div>
                 {selectedActivity.Activity_Head_Name && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">เสนอโดย</label>
-                    <p className="text-gray-800">{selectedActivity.Activity_Head_Name}</p>
+                    <p className="text-gray-800">{selectedActivity.Activity_Head_Name}
+                      {selectedActivity.Activity_Head_Email && <span className="text-gray-500 text-sm"> ({selectedActivity.Activity_Head_Email})</span>}
+                    </p>
                   </div>
                 )}
               </div>

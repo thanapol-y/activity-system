@@ -397,12 +397,18 @@ export default function ActivityHeadActivitiesPage() {
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-center">
                           <div className="flex gap-1 justify-center flex-wrap">
-                            <button
-                              onClick={() => handleEdit(activity)}
-                              className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                            >
-                              แก้ไข
-                            </button>
+                            {activity.Activity_Status === 'approved' ? (
+                              <span className="px-3 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed" title="ไม่สามารถแก้ไขกิจกรรมที่อนุมัติแล้วได้">
+                                แก้ไข
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleEdit(activity)}
+                                className="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                              >
+                                แก้ไข
+                              </button>
+                            )}
                             {activity.Activity_Status === 'approved' ? (
                               <span className="px-3 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed" title="ไม่สามารถลบกิจกรรมที่อนุมัติแล้วได้">
                                 ลบ
