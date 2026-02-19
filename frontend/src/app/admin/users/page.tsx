@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AlertModal from '@/components/AlertModal';
 import { adminAPI } from '@/lib/api';
 
 interface UserRecord {
@@ -96,6 +97,7 @@ export default function AdminUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -136,7 +138,7 @@ export default function AdminUsersPage() {
 
   const showMsg = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
+    setShowAlertModal(true);
   };
 
   // --- Create ---
@@ -292,16 +294,13 @@ export default function AdminUsersPage() {
           <p className="text-sm md:text-base text-gray-600">เพิ่ม แก้ไข ลบ และรีเซ็ตรหัสผ่านผู้ใช้ทุกประเภท</p>
         </div>
 
-        {/* Message */}
-        {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-50 border border-green-200 text-green-800'
-              : 'bg-red-50 border border-red-200 text-red-800'
-          }`}>
-            <p className="text-sm font-medium">{message.text}</p>
-          </div>
-        )}
+        {/* Alert Modal */}
+        <AlertModal
+          isOpen={showAlertModal}
+          onClose={() => setShowAlertModal(false)}
+          type={message?.type || 'error'}
+          message={message?.text || ''}
+        />
 
         {/* Role Tabs */}
         <div className="bg-white rounded-lg shadow-sm mb-6">

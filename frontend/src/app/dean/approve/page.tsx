@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AlertModal from '@/components/AlertModal';
 import { activitiesAPI } from '@/lib/api';
 import { Activity, ActivityStatus } from '@/types';
 
@@ -12,6 +13,7 @@ export default function DeanApprovePage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -55,11 +57,12 @@ export default function DeanApprovePage() {
       setProcessing(true);
       await activitiesAPI.approve(activity.Activity_ID);
       setMessage({ type: 'success', text: `อนุมัติกิจกรรม "${activity.Activity_Name}" เรียบร้อยแล้ว` });
+      setShowAlertModal(true);
       setShowDetailModal(false);
       loadActivities();
-      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : 'ไม่สามารถอนุมัติได้' });
+      setShowAlertModal(true);
     } finally {
       setProcessing(false);
     }
@@ -78,11 +81,12 @@ export default function DeanApprovePage() {
       setProcessing(true);
       await activitiesAPI.reject(selectedActivity.Activity_ID, rejectReason);
       setMessage({ type: 'success', text: `ปฏิเสธกิจกรรม "${selectedActivity.Activity_Name}" เรียบร้อยแล้ว` });
+      setShowAlertModal(true);
       setShowRejectModal(false);
       loadActivities();
-      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : 'ไม่สามารถปฏิเสธได้' });
+      setShowAlertModal(true);
     } finally {
       setProcessing(false);
     }
@@ -100,16 +104,13 @@ export default function DeanApprovePage() {
           <p className="text-gray-600">ตรวจสอบรายละเอียดแล้วกดปุ่ม "อนุมัติ" หรือ "ปฏิเสธ" เพื่อดำเนินการกับกิจกรรมที่รออยู่</p>
         </div>
 
-        {/* Message */}
-        {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-50 border border-green-200 text-green-800'
-              : 'bg-red-50 border border-red-200 text-red-800'
-          }`}>
-            <p className="text-sm font-medium">{message.text}</p>
-          </div>
-        )}
+        {/* Alert Modal */}
+        <AlertModal
+          isOpen={showAlertModal}
+          onClose={() => setShowAlertModal(false)}
+          type={message?.type || 'error'}
+          message={message?.text || ''}
+        />
 
         {/* Pending count */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">

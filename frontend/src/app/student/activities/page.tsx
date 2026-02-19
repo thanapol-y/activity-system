@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AlertModal from '@/components/AlertModal';
 import { activitiesAPI, registrationAPI } from '@/lib/api';
 import { Activity, ActivityStatus, Registration } from '@/types';
 
@@ -18,6 +19,7 @@ export default function StudentActivitiesPage() {
   const [showModal, setShowModal] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
   const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'date' | 'participants' | 'type' | 'hours'>('date');
   const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
@@ -105,15 +107,16 @@ export default function StudentActivitiesPage() {
       setRegistering(true);
       await registrationAPI.register(selectedActivity.Activity_ID);
       setMessage({ type: 'success', text: 'เข้าร่วมกิจกรรมสำเร็จ!' });
+      setShowAlertModal(true);
       setShowModal(false);
       setRegisteredIds(prev => new Set(prev).add(selectedActivity.Activity_ID));
       loadActivities();
-      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setMessage({
         type: 'error',
         text: error instanceof Error ? error.message : 'ลงทะเบียนไม่สำเร็จ',
       });
+      setShowAlertModal(true);
     } finally {
       setRegistering(false);
     }
@@ -157,18 +160,13 @@ export default function StudentActivitiesPage() {
           <p className="text-gray-600">ค้นหาและเลือกเข้าร่วมกิจกรรมที่คุณสนใจ กดที่การ์ดกิจกรรมเพื่อดูรายละเอียด</p>
         </div>
 
-        {/* Message Alert */}
-        {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              message.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-800'
-                : 'bg-red-50 border border-red-200 text-red-800'
-            }`}
-          >
-            <p className="text-sm font-medium">{message.text}</p>
-          </div>
-        )}
+        {/* Alert Modal */}
+        <AlertModal
+          isOpen={showAlertModal}
+          onClose={() => setShowAlertModal(false)}
+          type={message?.type || 'error'}
+          message={message?.text || ''}
+        />
 
         {/* Search and Filter */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">

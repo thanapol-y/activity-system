@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AlertModal from '@/components/AlertModal';
 import { registrationAPI } from '@/lib/api';
 import { Registration } from '@/types';
 
@@ -19,6 +20,7 @@ export default function MyActivitiesPage() {
   const [loadingQR, setLoadingQR] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
 
@@ -50,6 +52,7 @@ export default function MyActivitiesPage() {
       console.error('Error loading registrations:', error);
 
       setMessage({ type: 'error', text: 'ไม่สามารถโหลดข้อมูลได้' });
+      setShowAlertModal(true);
 
     } finally {
 
@@ -84,7 +87,7 @@ export default function MyActivitiesPage() {
     } catch (error) {
 
       setMessage({ type: 'error', text: 'ไม่สามารถโหลด QR Code ได้' });
-
+      setShowAlertModal(true);
       setShowQRModal(false);
 
     } finally {
@@ -120,22 +123,17 @@ export default function MyActivitiesPage() {
       await registrationAPI.cancel(selectedActivity.Activity_ID);
 
       setMessage({ type: 'success', text: 'ยกเลิกการลงทะเบียนสำเร็จ' });
-
+      setShowAlertModal(true);
       setShowCancelModal(false);
-
       loadRegistrations();
-
-      setTimeout(() => setMessage(null), 3000);
 
     } catch (error) {
 
       setMessage({
-
         type: 'error',
-
         text: error instanceof Error ? error.message : 'ไม่สามารถยกเลิกได้',
-
       });
+      setShowAlertModal(true);
 
     } finally {
 
@@ -235,29 +233,13 @@ export default function MyActivitiesPage() {
 
 
 
-        {/* Message Alert */}
-
-        {message && (
-
-          <div
-
-            className={`mb-6 p-4 rounded-lg ${
-
-              message.type === 'success'
-
-                ? 'bg-green-50 border border-green-200 text-green-800'
-
-                : 'bg-red-50 border border-red-200 text-red-800'
-
-            }`}
-
-          >
-
-            <p className="text-sm font-medium">{message.text}</p>
-
-          </div>
-
-        )}
+        {/* Alert Modal */}
+        <AlertModal
+          isOpen={showAlertModal}
+          onClose={() => setShowAlertModal(false)}
+          type={message?.type || 'error'}
+          message={message?.text || ''}
+        />
 
 
 

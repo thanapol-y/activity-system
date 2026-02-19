@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authAPI } from '@/lib/api';
+import AlertModal from '@/components/AlertModal';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function RegisterPage() {
     Branch_ID: '',
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -38,6 +40,7 @@ export default function RegisterPage() {
 
     if (errs.length > 0) {
       setErrors(errs);
+      setShowErrorModal(true);
       return;
     }
 
@@ -51,6 +54,7 @@ export default function RegisterPage() {
       }
     } catch (error) {
       setErrors([error instanceof Error ? error.message : 'สมัครสมาชิกไม่สำเร็จ']);
+      setShowErrorModal(true);
     } finally {
       setSubmitting(false);
     }
@@ -77,13 +81,14 @@ export default function RegisterPage() {
             </div>
           ) : (
             <>
-              {errors.length > 0 && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <ul className="list-disc list-inside text-sm text-red-600 space-y-1">
-                    {errors.map((err, i) => <li key={i}>{err}</li>)}
-                  </ul>
-                </div>
-              )}
+              {/* Error Modal */}
+              <AlertModal
+                isOpen={showErrorModal}
+                onClose={() => setShowErrorModal(false)}
+                type="error"
+                title="สมัครสมาชิกไม่สำเร็จ"
+                message={errors.join('\n')}
+              />
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

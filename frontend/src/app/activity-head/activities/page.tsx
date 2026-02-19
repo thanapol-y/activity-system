@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AlertModal from '@/components/AlertModal';
 import { activitiesAPI } from '@/lib/api';
 import { Activity, ActivityStatus, CreateActivityForm, ActivityType } from '@/types';
 
@@ -27,6 +28,7 @@ export default function ActivityHeadActivitiesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Modal states
   const [showFormModal, setShowFormModal] = useState(false);
@@ -194,10 +196,9 @@ export default function ActivityHeadActivitiesPage() {
         await activitiesAPI.create(formData);
         setMessage({ type: 'success', text: 'เพิ่มกิจกรรมสำเร็จ' });
       }
-
+      setShowAlertModal(true);
       setShowFormModal(false);
       loadActivities();
-      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setFormErrors([error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการบันทึกข้อมูล']);
     } finally {
@@ -212,11 +213,12 @@ export default function ActivityHeadActivitiesPage() {
       setDeleting(true);
       await activitiesAPI.delete(deletingActivity.Activity_ID);
       setMessage({ type: 'success', text: 'ลบกิจกรรมเรียบร้อยแล้ว' });
+      setShowAlertModal(true);
       setShowDeleteModal(false);
       loadActivities();
-      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : 'ไม่สามารถลบกิจกรรมได้' });
+      setShowAlertModal(true);
     } finally {
       setDeleting(false);
     }
@@ -266,18 +268,13 @@ export default function ActivityHeadActivitiesPage() {
           </button>
         </div>
 
-        {/* Message Alert */}
-        {message && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              message.type === 'success'
-                ? 'bg-green-50 border border-green-200 text-green-800'
-                : 'bg-red-50 border border-red-200 text-red-800'
-            }`}
-          >
-            <p className="text-sm font-medium">{message.text}</p>
-          </div>
-        )}
+        {/* Alert Modal */}
+        <AlertModal
+          isOpen={showAlertModal}
+          onClose={() => setShowAlertModal(false)}
+          type={message?.type || 'error'}
+          message={message?.text || ''}
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
