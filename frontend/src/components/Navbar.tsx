@@ -88,8 +88,8 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="Logo"
-              width={36}
-              height={36}
+              width={76}
+              height={76}
               className="rounded-full"
             />
             <div className="text-xl font-bold">
