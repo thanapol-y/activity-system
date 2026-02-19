@@ -371,7 +371,7 @@ export default function ActivityHeadDashboardPage() {
                               <Link href="/activity-head/activities" className="text-blue-600 hover:text-blue-800 font-medium">
                                 แก้ไข
                               </Link>
-                              <Link href={`/activity-head/activities`} className="text-green-600 hover:text-green-800 font-medium">
+                              <Link href={`/activity-head/students`} className="text-green-600 hover:text-green-800 font-medium">
                                 ดูรายชื่อ
                               </Link>
                             </div>
