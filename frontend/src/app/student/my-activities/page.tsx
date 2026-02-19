@@ -269,46 +269,6 @@ export default function MyActivitiesPage() {
 
             </button>
 
-            <button
-
-              onClick={() => setFilter('upcoming')}
-
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-
-                filter === 'upcoming'
-
-                  ? 'bg-[#2B4C8C] text-white'
-
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-
-              }`}
-
-            >
-
-              กำลังจะถึง
-
-            </button>
-
-            <button
-
-              onClick={() => setFilter('past')}
-
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-
-                filter === 'past'
-
-                  ? 'bg-[#2B4C8C] text-white'
-
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-
-              }`}
-
-            >
-
-              ที่ผ่านมา
-
-            </button>
-
           </div>
 
         </div>
