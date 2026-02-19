@@ -165,7 +165,7 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <img
-                src="/logo.png"
+                src="/logo2.png"
                 alt="คณะบริหารธุรกิจ มทร.พระนคร"
                 width={160}
                 height={160}
