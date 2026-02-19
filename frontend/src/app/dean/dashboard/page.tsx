@@ -54,8 +54,8 @@ export default function DeanDashboardPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard รองคณบดี</h1>
-          <p className="text-gray-600">สถานะการอนุมัติกิจกรรม</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Dashboard รองคณบดี</h1>
+          <p className="text-sm md:text-base text-gray-600">สถานะการอนุมัติกิจกรรม</p>
         </div>
 
         {loading ? (
@@ -132,16 +132,16 @@ export default function DeanDashboardPage() {
                 </div>
                 <div className="space-y-3">
                   {pendingActivities.slice(0, 5).map((act) => (
-                    <div key={act.Activity_ID} className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900">{act.Activity_Name}</h4>
+                    <div key={act.Activity_ID} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-gray-900 truncate">{act.Activity_Name}</h4>
                         <p className="text-sm text-gray-500">
                           {act.Activity_Type_Name || 'ทั่วไป'} · {formatDate(act.Activity_Date)} · โดย {act.Activity_Head_Name || '-'}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="text-sm font-medium text-gray-600">{act.Activity_Hours || 3} ชม.</span>
-                        <Link href="/dean/approve" className="px-4 py-2 bg-[#2B4C8C] text-white text-sm rounded-lg hover:bg-[#1e3a6e] transition-colors">
+                        <Link href="/dean/approve" className="px-4 py-2 bg-[#2B4C8C] text-white text-sm rounded-lg hover:bg-[#1e3a6e] transition-colors whitespace-nowrap">
                           พิจารณา
                         </Link>
                       </div>

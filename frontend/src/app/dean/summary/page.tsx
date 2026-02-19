@@ -103,8 +103,8 @@ export default function DeanSummaryPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">สรุปภาพรวมกิจกรรม</h1>
-          <p className="text-gray-600">ข้อมูลเชิงลึกและสถิติทั้งหมดของระบบกิจกรรม</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">สรุปภาพรวมกิจกรรม</h1>
+          <p className="text-sm md:text-base text-gray-600">ข้อมูลเชิงลึกและสถิติทั้งหมดของระบบกิจกรรม</p>
         </div>
 
         {loading ? (

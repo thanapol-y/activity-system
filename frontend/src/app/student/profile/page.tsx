@@ -59,8 +59,8 @@ export default function StudentProfilePage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">โปรไฟล์</h1>
-          <p className="text-gray-600">ข้อมูลส่วนตัวของคุณ (ดูอย่างเดียว)</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">โปรไฟล์</h1>
+          <p className="text-sm md:text-base text-gray-600">ข้อมูลส่วนตัวของคุณ (ดูอย่างเดียว)</p>
         </div>
 
         <div className="max-w-2xl mx-auto">

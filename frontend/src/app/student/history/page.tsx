@@ -69,8 +69,8 @@ export default function StudentHistoryPage() {
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">ประวัติการเข้าร่วมกิจกรรม</h1>
-          <p className="text-gray-600">ดูสถานะการเข้าร่วมกิจกรรมทั้งหมด สีเขียว = เข้าร่วมแล้ว, สีแดง = ยังไม่ได้เข้าร่วม</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">ประวัติการเข้าร่วมกิจกรรม</h1>
+          <p className="text-sm md:text-base text-gray-600">ดูสถานะการเข้าร่วมกิจกรรมทั้งหมด สีเขียว = เข้าร่วมแล้ว, สีแดง = ยังไม่ได้เข้าร่วม</p>
         </div>
 
         {/* Stats */}

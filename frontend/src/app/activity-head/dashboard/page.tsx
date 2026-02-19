@@ -79,14 +79,14 @@ export default function ActivityHeadDashboardPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard หัวหน้ากิจกรรม</h1>
-            <p className="text-gray-600">กดปุ่ม "สร้างกิจกรรม" เพื่อเพิ่มกิจกรรมใหม่ หรือดูรายชื่อผู้ลงทะเบียนและรายงานปัญหาได้ที่เมนูด้านบน</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Dashboard หัวหน้ากิจกรรม</h1>
+            <p className="text-sm md:text-base text-gray-600">กดปุ่ม "สร้างกิจกรรม" เพื่อเพิ่มกิจกรรมใหม่ หรือดูรายชื่อผู้ลงทะเบียนได้ที่เมนูด้านบน</p>
           </div>
           <Link
             href="/activity-head/activities"
-            className="bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-6 rounded-lg transition-colors"
+            className="bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-6 rounded-lg transition-colors text-center whitespace-nowrap"
           >
             + เพิ่มกิจกรรมใหม่
           </Link>
@@ -188,8 +188,8 @@ export default function ActivityHeadDashboardPage() {
 
             {/* Search */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 max-w-md">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex-1">
                   <div className="relative">
                     <input
                       type="text"
@@ -213,11 +213,11 @@ export default function ActivityHeadDashboardPage() {
                     </svg>
                   </div>
                 </div>
-                <div className="flex space-x-3 ml-4">
-                  <Link href="/activity-head/activities" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex space-x-3">
+                  <Link href="/activity-head/activities" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm whitespace-nowrap">
                     จัดการกิจกรรม
                   </Link>
-                  <Link href="/activity-head/reports" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Link href="/activity-head/reports" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm whitespace-nowrap">
                     รายงาน
                   </Link>
                 </div>
@@ -384,7 +384,7 @@ export default function ActivityHeadDashboardPage() {
               </div>
 
               {activities.length > 0 && (
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                <div className="px-4 md:px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
                   <p className="text-sm text-gray-700">
                     แสดง 1 ถึง {Math.min(5, activities.length)} จาก {activities.length} รายการ
                   </p>

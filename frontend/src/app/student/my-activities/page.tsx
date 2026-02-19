@@ -227,9 +227,9 @@ export default function MyActivitiesPage() {
 
         <div className="mb-8">
 
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">กิจกรรมของฉัน</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">กิจกรรมของฉัน</h1>
 
-          <p className="text-gray-600">ดูกิจกรรมที่คุณเข้าร่วมแล้ว กด "QR Code" เพื่อแสดง QR ให้เจ้าหน้าที่สแกนในวันงาน หรือกด "ยกเลิก" หากไม่ต้องการเข้าร่วมแล้ว</p>
+          <p className="text-sm md:text-base text-gray-600">ดูกิจกรรมที่คุณเข้าร่วมแล้ว กด "QR Code" เพื่อแสดง QR ให้เจ้าหน้าที่สแกนในวันงาน หรือกด "ยกเลิก" หากไม่ต้องการเข้าร่วมแล้ว</p>
 
         </div>
 
@@ -401,7 +401,7 @@ export default function MyActivitiesPage() {
 
                     <div className="p-6">
 
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
 
                         <div className="flex-1">
 
@@ -577,7 +577,7 @@ export default function MyActivitiesPage() {
 
 
 
-                        <div className="ml-6 flex flex-col space-y-2">
+                        <div className="flex flex-row md:flex-col space-x-2 md:space-x-0 md:space-y-2">
                           <button
                             onClick={() => { setSelectedActivity(registration); setShowDetailModal(true); }}
                             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium whitespace-nowrap"

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,7 @@ interface NavItem {
 export default function Navbar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (!user) return null;
 
@@ -79,70 +80,65 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] text-white shadow-lg">
-      {/* Top Bar */}
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo/Title */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 md:space-x-3 min-w-0">
             <img
               src="/logo.png"
               alt="Logo"
               width={100}
               height={100}
-              className="object-contain drop-shadow-sm"
+              className="object-contain drop-shadow-sm w-10 h-10 md:w-[100px] md:h-[100px] flex-shrink-0"
             />
-            <div className="text-xl font-bold">
-              ระบบลงทะเบียนเข้าร่วมกิจกรรม
-            </div>
-            <div className="hidden md:block text-sm opacity-90">
-              - {getRoleName(user.role)}
+            <div className="min-w-0">
+              <div className="text-sm md:text-xl font-bold truncate">
+                ระบบกิจกรรมนักศึกษา
+              </div>
+              <div className="hidden md:block text-xs opacity-90">
+                {getRoleName(user.role)}
+              </div>
             </div>
           </div>
 
-          {/* User Info & Logout */}
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-2">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
+          {/* Desktop: User Info & Logout */}
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <span className="text-sm font-medium">{user.name}</span>
             </div>
-
             <button
               onClick={logout}
               className="flex items-center space-x-1 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm font-medium"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
               <span>ออกจากระบบ</span>
             </button>
           </div>
+
+          {/* Mobile: Hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Desktop Navigation Tabs */}
         {navItems.length > 0 && (
-          <div className="flex space-x-1 pb-0 border-b border-white/20">
+          <div className="hidden md:flex space-x-1 pb-0 border-b border-white/20 overflow-x-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
               return (
@@ -150,7 +146,7 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={`
-                    px-6 py-3 text-sm font-medium transition-all relative
+                    px-4 lg:px-6 py-3 text-sm font-medium transition-all relative whitespace-nowrap
                     ${
                       isActive
                         ? 'text-white bg-white/10'
@@ -168,6 +164,49 @@ export default function Navbar() {
           </div>
         )}
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-white/20">
+          <div className="px-4 py-2 space-y-1">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+          <div className="px-4 py-3 border-t border-white/20">
+            <div className="flex items-center space-x-2 mb-3 text-sm text-white/80">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span>{user.name}</span>
+              <span className="text-white/50">({getRoleName(user.role)})</span>
+            </div>
+            <button
+              onClick={() => { setMobileMenuOpen(false); logout(); }}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span>ออกจากระบบ</span>
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

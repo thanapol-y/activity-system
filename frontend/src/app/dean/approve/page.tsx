@@ -147,10 +147,10 @@ export default function DeanApprovePage() {
             {activities.map((activity) => (
               <div key={activity.Activity_ID} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="p-6">
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-800">{activity.Activity_Name}</h3>
+                      <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                        <h3 className="text-lg md:text-xl font-semibold text-gray-800">{activity.Activity_Name}</h3>
                         <span className="px-3 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
                           รออนุมัติ
                         </span>
@@ -212,7 +212,7 @@ export default function DeanApprovePage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="ml-6 flex flex-col gap-2">
+                    <div className="flex flex-row md:flex-col gap-2">
                       <button
                         onClick={() => handleViewDetail(activity)}
                         className="px-4 py-2 text-sm font-medium text-[#2B4C8C] bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap"

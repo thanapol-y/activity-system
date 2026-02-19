@@ -152,11 +152,9 @@ export default function ActivityHeadReportsPage() {
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">รายงานสรุป</h1>
-            <p className="text-gray-600">ดูสถิติและรายงานกิจกรรมทั้งหมดที่คุณสร้าง</p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">รายงานสรุป</h1>
+          <p className="text-sm md:text-base text-gray-600">ดูสถิติและรายงานกิจกรรมทั้งหมดที่คุณสร้าง</p>
         </div>
 
         {/* Export Section */}

@@ -288,8 +288,8 @@ export default function AdminUsersPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">จัดการผู้ใช้</h1>
-          <p className="text-gray-600">เพิ่ม แก้ไข ลบ และรีเซ็ตรหัสผ่านผู้ใช้ทุกประเภท</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">จัดการผู้ใช้</h1>
+          <p className="text-sm md:text-base text-gray-600">เพิ่ม แก้ไข ลบ และรีเซ็ตรหัสผ่านผู้ใช้ทุกประเภท</p>
         </div>
 
         {/* Message */}

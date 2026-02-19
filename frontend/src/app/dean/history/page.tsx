@@ -87,12 +87,12 @@ export default function DeanHistoryPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">ประวัติการอนุมัติ</h1>
-          <p className="text-gray-600">ดูประวัติการอนุมัติและปฏิเสธกิจกรรมทั้งหมด</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">ประวัติการอนุมัติ</h1>
+          <p className="text-sm md:text-base text-gray-600">ดูประวัติการอนุมัติและปฏิเสธกิจกรรมทั้งหมด</p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm p-4 text-center">
             <p className="text-sm text-gray-500 mb-1">ทั้งหมด</p>
             <p className="text-2xl font-bold text-[#2B4C8C]">{records.length}</p>

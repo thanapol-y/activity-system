@@ -56,18 +56,18 @@ export default function ClubDashboardPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
               Dashboard สโมสรนักศึกษา
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm md:text-base text-gray-600">
               ยินดีต้อนรับ {user?.name || ''} กดปุ่ม "สแกน QR" เพื่อเช็คอินนักศึกษา หรือดูประวัติเช็คอินได้ที่เมนูด้านบน
             </p>
           </div>
           <Link
             href="/club/scan"
-            className="bg-[#2B4C8C] hover:bg-[#1e3563] text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center space-x-2"
+            className="bg-[#2B4C8C] hover:bg-[#1e3563] text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2 whitespace-nowrap"
           >
             <svg
               className="w-5 h-5"

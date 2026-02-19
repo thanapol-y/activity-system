@@ -104,8 +104,8 @@ export default function ActivityHeadStudentsPage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">ผู้ลงทะเบียนทั้งหมด</h1>
-          <p className="text-gray-600">แสดงนักศึกษาที่ลงทะเบียนทั้งหมดทุกกิจกรรม สามารถค้นหาและเรียงลำดับได้ตามต้องการ</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">ผู้ลงทะเบียนทั้งหมด</h1>
+          <p className="text-sm md:text-base text-gray-600">แสดงนักศึกษาที่ลงทะเบียนทั้งหมดทุกกิจกรรม สามารถค้นหาและเรียงลำดับได้ตามต้องการ</p>
         </div>
 
         {/* Stats */}

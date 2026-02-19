@@ -175,8 +175,8 @@ export default function ClubScanPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">สแกน QR Code เช็คอิน</h1>
-          <p className="text-gray-600">สแกน QR Code ของนักศึกษาเพื่อยืนยันการเข้าร่วมกิจกรรม</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">สแกน QR Code เช็คอิน</h1>
+          <p className="text-sm md:text-base text-gray-600">สแกน QR Code ของนักศึกษาเพื่อยืนยันการเข้าร่วมกิจกรรม</p>
         </div>
 
         <div className="max-w-2xl mx-auto">

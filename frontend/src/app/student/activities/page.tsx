@@ -153,7 +153,7 @@ export default function StudentActivitiesPage() {
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">กิจกรรมทั้งหมด</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">กิจกรรมทั้งหมด</h1>
           <p className="text-gray-600">ค้นหาและเลือกเข้าร่วมกิจกรรมที่คุณสนใจ กดที่การ์ดกิจกรรมเพื่อดูรายละเอียด</p>
         </div>
 

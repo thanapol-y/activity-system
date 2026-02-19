@@ -125,7 +125,7 @@ export default function LoginPage() {
       {showQuickLogin && (
         <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setShowQuickLogin(false)}>
           <div
-            className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl overflow-y-auto z-50 animate-slide-in"
+            className="fixed right-0 top-0 h-full w-full sm:w-80 bg-white shadow-2xl overflow-y-auto z-50 animate-slide-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 bg-gradient-to-r from-[#2B4C8C] to-[#3B5998] text-white">
@@ -160,7 +160,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md">
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
           {/* Header with Logo */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -169,13 +169,13 @@ export default function LoginPage() {
                 alt="คณะบริหารธุรกิจ มทร.พระนคร"
                 width={160}
                 height={160}
-                className="object-contain drop-shadow-md"
+                className="object-contain drop-shadow-md w-28 h-28 sm:w-40 sm:h-40"
               />
             </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-1">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-1">
               ระบบกิจกรรมนักศึกษา มทร.พระนคร
             </h3>
-            <p className="text-m text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
+            <p className="text-sm text-gray-500">กรุณาเลือกประเภทผู้ใช้งาน กรอกรหัสผู้ใช้ และรหัสผ่าน</p>
           </div>
 
           {/* Error Message */}

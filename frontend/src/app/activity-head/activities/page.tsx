@@ -253,14 +253,14 @@ export default function ActivityHeadActivitiesPage() {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">จัดการกิจกรรม</h1>
-            <p className="text-gray-600">สร้าง แก้ไข และจัดการกิจกรรมทั้งหมด</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">จัดการกิจกรรม</h1>
+            <p className="text-sm md:text-base text-gray-600">สร้าง แก้ไข และจัดการกิจกรรมทั้งหมด</p>
           </div>
           <button
             onClick={handleCreate}
-            className="bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-6 rounded-lg transition-colors"
+            className="bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-6 rounded-lg transition-colors text-center whitespace-nowrap"
           >
             + เพิ่มกิจกรรมใหม่
           </button>
