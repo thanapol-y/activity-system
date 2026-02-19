@@ -56,13 +56,13 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     const { role, search, page = '1', limit = '15' } = req.query;
 
     if (!role || typeof role !== 'string') {
-      res.status(400).json({ success: false, message: 'Role is required' });
+      res.status(400).json({ success: false, message: 'กรุณาระบุประเภทผู้ใช้' });
       return;
     }
 
     const config = getRoleConfig(role);
     if (!config) {
-      res.status(400).json({ success: false, message: 'Invalid role' });
+      res.status(400).json({ success: false, message: 'ประเภทผู้ใช้ไม่ถูกต้อง' });
       return;
     }
 
@@ -104,7 +104,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error('Admin getUsers error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };
 
@@ -117,7 +117,7 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
     const id = req.params.id as string;
     const config = getRoleConfig(role);
     if (!config) {
-      res.status(400).json({ success: false, message: 'Invalid role' });
+      res.status(400).json({ success: false, message: 'ประเภทผู้ใช้ไม่ถูกต้อง' });
       return;
     }
 
@@ -127,14 +127,14 @@ export const getUser = async (req: Request, res: Response): Promise<void> => {
     );
 
     if (rows.length === 0) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: 'ไม่พบข้อมูลผู้ใช้' });
       return;
     }
 
     res.status(200).json({ success: true, data: rows[0] });
   } catch (error) {
     console.error('Admin getUser error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };
 
@@ -146,7 +146,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const role = req.params.role as string;
     const config = getRoleConfig(role);
     if (!config) {
-      res.status(400).json({ success: false, message: 'Invalid role' });
+      res.status(400).json({ success: false, message: 'ประเภทผู้ใช้ไม่ถูกต้อง' });
       return;
     }
 
@@ -155,11 +155,11 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const password = data.password;
 
     if (!id) {
-      res.status(400).json({ success: false, message: `${config.idCol} is required` });
+      res.status(400).json({ success: false, message: 'กรุณาระบุรหัสผู้ใช้' });
       return;
     }
     if (!password) {
-      res.status(400).json({ success: false, message: 'Password is required' });
+      res.status(400).json({ success: false, message: 'กรุณากรอกรหัสผ่าน' });
       return;
     }
 
@@ -169,7 +169,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       [id]
     );
     if (existing.length > 0) {
-      res.status(409).json({ success: false, message: 'User ID already exists' });
+      res.status(409).json({ success: false, message: 'รหัสผู้ใช้นี้มีอยู่ในระบบแล้ว' });
       return;
     }
 
@@ -188,10 +188,10 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       values
     );
 
-    res.status(201).json({ success: true, message: 'User created successfully' });
+    res.status(201).json({ success: true, message: 'เพิ่มผู้ใช้สำเร็จ' });
   } catch (error) {
     console.error('Admin createUser error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };
 
@@ -204,7 +204,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     const id = req.params.id as string;
     const config = getRoleConfig(role);
     if (!config) {
-      res.status(400).json({ success: false, message: 'Invalid role' });
+      res.status(400).json({ success: false, message: 'ประเภทผู้ใช้ไม่ถูกต้อง' });
       return;
     }
 
@@ -216,7 +216,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       [id]
     );
     if (existing.length === 0) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: 'ไม่พบข้อมูลผู้ใช้' });
       return;
     }
 
@@ -233,7 +233,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     }
 
     if (setClauses.length === 0) {
-      res.status(400).json({ success: false, message: 'No fields to update' });
+      res.status(400).json({ success: false, message: 'ไม่มีข้อมูลที่ต้องอัปเดต' });
       return;
     }
 
@@ -243,10 +243,10 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       values
     );
 
-    res.status(200).json({ success: true, message: 'User updated successfully' });
+    res.status(200).json({ success: true, message: 'แก้ไขข้อมูลผู้ใช้สำเร็จ' });
   } catch (error) {
     console.error('Admin updateUser error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };
 
@@ -259,7 +259,7 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     const id = req.params.id as string;
     const config = getRoleConfig(role);
     if (!config) {
-      res.status(400).json({ success: false, message: 'Invalid role' });
+      res.status(400).json({ success: false, message: 'ประเภทผู้ใช้ไม่ถูกต้อง' });
       return;
     }
 
@@ -269,14 +269,14 @@ export const deleteUser = async (req: Request, res: Response): Promise<void> => 
     );
 
     if (result.affectedRows === 0) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: 'ไม่พบข้อมูลผู้ใช้' });
       return;
     }
 
-    res.status(200).json({ success: true, message: 'User deleted successfully' });
+    res.status(200).json({ success: true, message: 'ลบผู้ใช้สำเร็จ' });
   } catch (error) {
     console.error('Admin deleteUser error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };
 
@@ -290,12 +290,12 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     const { newPassword } = req.body;
     const config = getRoleConfig(role);
     if (!config) {
-      res.status(400).json({ success: false, message: 'Invalid role' });
+      res.status(400).json({ success: false, message: 'ประเภทผู้ใช้ไม่ถูกต้อง' });
       return;
     }
 
     if (!newPassword || newPassword.length < 4) {
-      res.status(400).json({ success: false, message: 'Password must be at least 4 characters' });
+      res.status(400).json({ success: false, message: 'รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร' });
       return;
     }
 
@@ -307,14 +307,14 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     );
 
     if (result.affectedRows === 0) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      res.status(404).json({ success: false, message: 'ไม่พบข้อมูลผู้ใช้' });
       return;
     }
 
-    res.status(200).json({ success: true, message: 'Password reset successfully' });
+    res.status(200).json({ success: true, message: 'รีเซ็ตรหัสผ่านสำเร็จ' });
   } catch (error) {
     console.error('Admin resetPassword error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };
 
@@ -341,6 +341,6 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
     });
   } catch (error) {
     console.error('Admin getDashboardStats error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในระบบ' });
   }
 };

@@ -19,7 +19,7 @@ export const registerForActivity = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -30,7 +30,7 @@ export const registerForActivity = async (
     if (!Activity_ID) {
       res.status(400).json({
         success: false,
-        message: "Activity_ID is required",
+        message: "กรุณาระบุรหัสกิจกรรม",
       });
       return;
     }
@@ -44,7 +44,7 @@ export const registerForActivity = async (
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Activity not found",
+        message: "ไม่พบกิจกรรมที่ระบุ",
       });
       return;
     }
@@ -54,7 +54,7 @@ export const registerForActivity = async (
     if (activity.Activity_Status !== ActivityStatus.APPROVED) {
       res.status(400).json({
         success: false,
-        message: "Activity is not approved yet",
+        message: "กิจกรรมยังไม่ได้รับการอนุมัติ",
       });
       return;
     }
@@ -63,7 +63,7 @@ export const registerForActivity = async (
     if (activity.Deadline && new Date(activity.Deadline) < new Date()) {
       res.status(400).json({
         success: false,
-        message: "Registration deadline has passed",
+        message: "หมดเวลาลงทะเบียนแล้ว",
       });
       return;
     }
@@ -78,7 +78,7 @@ export const registerForActivity = async (
       if (existing[0].Registration_Status === RegistrationStatus.REGISTERED) {
         res.status(409).json({
           success: false,
-          message: "You are already registered for this activity",
+          message: "คุณลงทะเบียนกิจกรรมนี้แล้ว",
         });
         return;
       } else {
@@ -90,7 +90,7 @@ export const registerForActivity = async (
 
         res.status(200).json({
           success: true,
-          message: "Re-registered for activity successfully",
+          message: "ลงทะเบียนกิจกรรมอีกครั้งสำเร็จ",
         });
         return;
       }
@@ -105,7 +105,7 @@ export const registerForActivity = async (
     if (countRows[0].count >= activity.Maximum_Capacity) {
       res.status(400).json({
         success: false,
-        message: "Activity is full",
+        message: "กิจกรรมเต็มแล้ว",
       });
       return;
     }
@@ -121,7 +121,7 @@ export const registerForActivity = async (
 
     res.status(201).json({
       success: true,
-      message: "Registered for activity successfully",
+      message: "ลงทะเบียนกิจกรรมสำเร็จ",
       data: {
         Activity_ID,
         Student_ID,
@@ -132,7 +132,7 @@ export const registerForActivity = async (
     console.error("Register for activity error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -149,7 +149,7 @@ export const cancelRegistration = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -160,7 +160,7 @@ export const cancelRegistration = async (
     if (!Activity_ID) {
       res.status(400).json({
         success: false,
-        message: "Activity_ID is required",
+        message: "กรุณาระบุรหัสกิจกรรม",
       });
       return;
     }
@@ -174,7 +174,7 @@ export const cancelRegistration = async (
     if (registrations.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Registration not found",
+        message: "ไม่พบข้อมูลการลงทะเบียน",
       });
       return;
     }
@@ -184,7 +184,7 @@ export const cancelRegistration = async (
     if (registration.Registration_Status === RegistrationStatus.CANCELLED) {
       res.status(400).json({
         success: false,
-        message: "Registration is already cancelled",
+        message: "การลงทะเบียนถูกยกเลิกแล้ว",
       });
       return;
     }
@@ -201,7 +201,7 @@ export const cancelRegistration = async (
       res.status(400).json({
         success: false,
         message:
-          "Cannot cancel registration less than 24 hours before the activity",
+          "ไม่สามารถยกเลิกการลงทะเบียนได้ เนื่องจากเหลือเวลาน้อยกว่า 24 ชั่วโมงก่อนเริ่มกิจกรรม",
       });
       return;
     }
@@ -215,7 +215,7 @@ export const cancelRegistration = async (
     if (checkins.length > 0) {
       res.status(400).json({
         success: false,
-        message: "Cannot cancel registration after check-in",
+        message: "ไม่สามารถยกเลิกได้ เนื่องจากเช็คอินแล้ว",
       });
       return;
     }
@@ -228,13 +228,13 @@ export const cancelRegistration = async (
 
     res.status(200).json({
       success: true,
-      message: "Registration cancelled successfully",
+      message: "ยกเลิกการลงทะเบียนสำเร็จ",
     });
   } catch (error) {
     console.error("Cancel registration error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -251,7 +251,7 @@ export const getMyRegistrations = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -299,7 +299,7 @@ export const getMyRegistrations = async (
     console.error("Get my registrations error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -313,7 +313,7 @@ export const getQRCode = async (req: Request, res: Response): Promise<void> => {
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -332,7 +332,7 @@ export const getQRCode = async (req: Request, res: Response): Promise<void> => {
     if (registrations.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Registration not found",
+        message: "ไม่พบข้อมูลการลงทะเบียน",
       });
       return;
     }
@@ -363,7 +363,7 @@ export const getQRCode = async (req: Request, res: Response): Promise<void> => {
     console.error("Get QR code error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -380,7 +380,7 @@ export const checkInWithQRCode = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -391,7 +391,7 @@ export const checkInWithQRCode = async (
     if (!qrData) {
       res.status(400).json({
         success: false,
-        message: "QR code data is required",
+        message: "กรุณาระบุข้อมูล QR Code",
       });
       return;
     }
@@ -402,7 +402,7 @@ export const checkInWithQRCode = async (
     if (!parsedData) {
       res.status(400).json({
         success: false,
-        message: "Invalid QR code format",
+        message: "รูปแบบ QR Code ไม่ถูกต้อง",
       });
       return;
     }
@@ -428,7 +428,7 @@ export const checkInWithQRCode = async (
     if (activityRows.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Activity not found or not approved",
+        message: "ไม่พบกิจกรรมหรือกิจกรรมยังไม่ได้รับการอนุมัติ",
       });
       return;
     }
@@ -442,7 +442,7 @@ export const checkInWithQRCode = async (
     if (registrations.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Student is not registered for this activity",
+        message: "นักศึกษาไม่ได้ลงทะเบียนกิจกรรมนี้",
       });
       return;
     }
@@ -456,7 +456,7 @@ export const checkInWithQRCode = async (
     if (existing.length > 0) {
       res.status(409).json({
         success: false,
-        message: "Student has already checked in",
+        message: "นักศึกษาเช็คอินแล้ว",
         data: {
           CheckIn_Time: existing[0].CheckIn_Time,
         },
@@ -478,7 +478,7 @@ export const checkInWithQRCode = async (
 
     res.status(201).json({
       success: true,
-      message: "Check-in successful",
+      message: "เช็คอินสำเร็จ",
       data: {
         Student_ID: studentId,
         Student_Name: students[0]?.Student_Name,
@@ -490,7 +490,7 @@ export const checkInWithQRCode = async (
     console.error("Check-in with QR code error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -507,7 +507,7 @@ export const getCheckInHistory = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -544,7 +544,7 @@ export const getCheckInHistory = async (
     console.error("Get check-in history error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -561,7 +561,7 @@ export const getActivityHistory = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -599,7 +599,7 @@ export const getActivityHistory = async (
     console.error("Get activity history error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

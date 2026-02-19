@@ -13,7 +13,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     if (!token) {
       res.status(401).json({
         success: false,
-        message: 'Access denied. No token provided.',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -28,7 +28,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
   } catch (error) {
     res.status(401).json({
       success: false,
-      message: 'Invalid or expired token',
+      message: 'เซสชันหมดอายุหรือไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -42,7 +42,7 @@ export const authorize = (...allowedRoles: UserRole[]) => {
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -52,7 +52,7 @@ export const authorize = (...allowedRoles: UserRole[]) => {
     if (!allowedRoles.includes(userRole)) {
       res.status(403).json({
         success: false,
-        message: 'Access denied. Insufficient permissions.',
+        message: 'คุณไม่มีสิทธิ์เข้าถึงส่วนนี้',
         requiredRoles: allowedRoles,
         userRole: userRole,
       });

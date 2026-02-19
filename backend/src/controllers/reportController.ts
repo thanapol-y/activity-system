@@ -8,7 +8,7 @@ import pool from '../config/database';
 export const createReport = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'User not authenticated' });
+      res.status(401).json({ success: false, message: 'กรุณาเข้าสู่ระบบก่อน' });
       return;
     }
 
@@ -18,7 +18,7 @@ export const createReport = async (req: Request, res: Response): Promise<void> =
     if (!Activity_ID || !Report_Text?.trim()) {
       res.status(400).json({
         success: false,
-        message: 'Activity_ID and Report_Text are required',
+        message: 'กรุณาระบุรหัสกิจกรรมและรายละเอียดการรายงาน',
       });
       return;
     }
@@ -30,13 +30,13 @@ export const createReport = async (req: Request, res: Response): Promise<void> =
 
     res.status(201).json({
       success: true,
-      message: 'Report submitted successfully',
+      message: 'ส่งรายงานสำเร็จ',
     });
   } catch (error) {
     console.error('Create report error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -48,7 +48,7 @@ export const createReport = async (req: Request, res: Response): Promise<void> =
 export const getReportsForActivityHead = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'User not authenticated' });
+      res.status(401).json({ success: false, message: 'กรุณาเข้าสู่ระบบก่อน' });
       return;
     }
 
@@ -73,7 +73,7 @@ export const getReportsForActivityHead = async (req: Request, res: Response): Pr
     console.error('Get reports error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -85,7 +85,7 @@ export const getReportsForActivityHead = async (req: Request, res: Response): Pr
 export const updateReportStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'User not authenticated' });
+      res.status(401).json({ success: false, message: 'กรุณาเข้าสู่ระบบก่อน' });
       return;
     }
 
@@ -95,7 +95,7 @@ export const updateReportStatus = async (req: Request, res: Response): Promise<v
     if (!['pending', 'acknowledged', 'resolved'].includes(status)) {
       res.status(400).json({
         success: false,
-        message: 'Invalid status. Must be pending, acknowledged, or resolved',
+        message: 'สถานะไม่ถูกต้อง',
       });
       return;
     }
@@ -107,13 +107,13 @@ export const updateReportStatus = async (req: Request, res: Response): Promise<v
 
     res.status(200).json({
       success: true,
-      message: 'Report status updated successfully',
+      message: 'อัปเดตสถานะรายงานสำเร็จ',
     });
   } catch (error) {
     console.error('Update report status error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -125,7 +125,7 @@ export const updateReportStatus = async (req: Request, res: Response): Promise<v
 export const getMyReports = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
-      res.status(401).json({ success: false, message: 'User not authenticated' });
+      res.status(401).json({ success: false, message: 'กรุณาเข้าสู่ระบบก่อน' });
       return;
     }
 
@@ -149,7 +149,7 @@ export const getMyReports = async (req: Request, res: Response): Promise<void> =
     console.error('Get my reports error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -169,7 +169,7 @@ export const getGenders = async (req: Request, res: Response): Promise<void> => 
     console.error('Get genders error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }

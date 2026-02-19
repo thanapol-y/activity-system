@@ -403,12 +403,18 @@ export default function ActivityHeadActivitiesPage() {
                             >
                               แก้ไข
                             </button>
-                            <button
-                              onClick={() => handleDeleteClick(activity)}
-                              className="px-3 py-1 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                            >
-                              ลบ
-                            </button>
+                            {activity.Activity_Status === 'approved' ? (
+                              <span className="px-3 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed" title="ไม่สามารถลบกิจกรรมที่อนุมัติแล้วได้">
+                                ลบ
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleDeleteClick(activity)}
+                                className="px-3 py-1 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                              >
+                                ลบ
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

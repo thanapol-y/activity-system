@@ -98,7 +98,7 @@ export const getOverallStatistics = async (
     console.error("Get overall statistics error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -130,7 +130,7 @@ export const getActivityStatistics = async (
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: "Activity not found",
+        message: "ไม่พบกิจกรรมที่ระบุ",
       });
       return;
     }
@@ -227,7 +227,7 @@ export const getActivityStatistics = async (
     console.error("Get activity statistics error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -244,7 +244,7 @@ export const getDeanApprovalHistory = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -312,7 +312,7 @@ export const getDeanApprovalHistory = async (
     console.error("Get dean approval history error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -329,7 +329,7 @@ export const getActivityHeadStatistics = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -399,7 +399,7 @@ export const getActivityHeadStatistics = async (
     console.error("Get activity head statistics error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -416,7 +416,7 @@ export const getClubStatistics = async (
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: "User not authenticated",
+        message: "กรุณาเข้าสู่ระบบก่อน",
       });
       return;
     }
@@ -479,7 +479,7 @@ export const getClubStatistics = async (
     console.error("Get club statistics error:", error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "เกิดข้อผิดพลาดภายในระบบ",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

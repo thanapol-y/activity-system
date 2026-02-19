@@ -20,7 +20,7 @@ export const getActivityTypes = async (req: Request, res: Response): Promise<voi
     console.error('Get activity types error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
     });
   }
 };
@@ -33,7 +33,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -55,7 +55,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
     if (!Activity_Name || !Activity_Date || !Activity_Time || !Activity_Location || !Maximum_Capacity) {
       res.status(400).json({
         success: false,
-        message: 'Required fields: Activity_Name, Activity_Date, Activity_Time, Activity_Location, Maximum_Capacity',
+        message: 'กรุณากรอกข้อมูลที่จำเป็น: ชื่อกิจกรรม, วันที่, เวลา, สถานที่, จำนวนผู้เข้าร่วมสูงสุด',
       });
       return;
     }
@@ -70,7 +70,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
       if (typeRows.length === 0) {
         res.status(400).json({
           success: false,
-          message: 'Invalid Activity Type ID',
+          message: 'รหัสประเภทกิจกรรมไม่ถูกต้อง',
         });
         return;
       }
@@ -105,7 +105,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
 
     res.status(201).json({
       success: true,
-      message: 'Activity created successfully',
+      message: 'สร้างกิจกรรมสำเร็จ',
       data: {
         Activity_ID,
         Activity_Name,
@@ -116,7 +116,7 @@ export const createActivity = async (req: Request, res: Response): Promise<void>
     console.error('Create activity error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -216,7 +216,7 @@ export const getAllActivities = async (req: Request, res: Response): Promise<voi
     console.error('Get all activities error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -251,7 +251,7 @@ export const getActivityById = async (req: Request, res: Response): Promise<void
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -264,7 +264,7 @@ export const getActivityById = async (req: Request, res: Response): Promise<void
     console.error('Get activity by ID error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -278,7 +278,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -295,7 +295,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -306,7 +306,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
     if (req.user.role === UserRole.ACTIVITY_HEAD && activity.Activity_Head_ID !== req.user.userId) {
       res.status(403).json({
         success: false,
-        message: 'You can only update your own activities',
+        message: 'คุณสามารถแก้ไขได้เฉพาะกิจกรรมของตัวเองเท่านั้น',
       });
       return;
     }
@@ -315,7 +315,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
     if (activity.Activity_Status !== ActivityStatus.PENDING) {
       res.status(400).json({
         success: false,
-        message: `Cannot update ${activity.Activity_Status} activity`,
+        message: activity.Activity_Status === 'approved' ? 'ไม่สามารถแก้ไขกิจกรรมที่อนุมัติแล้วได้' : 'ไม่สามารถแก้ไขกิจกรรมที่ถูกปฏิเสธได้',
       });
       return;
     }
@@ -330,7 +330,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
       if (typeRows.length === 0) {
         res.status(400).json({
           success: false,
-          message: 'Invalid Activity Type ID',
+          message: 'รหัสประเภทกิจกรรมไม่ถูกต้อง',
         });
         return;
       }
@@ -376,7 +376,7 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
     if (updateFields.length === 0) {
       res.status(400).json({
         success: false,
-        message: 'No fields to update',
+        message: 'ไม่มีข้อมูลที่ต้องอัปเดต',
       });
       return;
     }
@@ -390,13 +390,13 @@ export const updateActivity = async (req: Request, res: Response): Promise<void>
 
     res.status(200).json({
       success: true,
-      message: 'Activity updated successfully',
+      message: 'แก้ไขกิจกรรมสำเร็จ',
     });
   } catch (error) {
     console.error('Update activity error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -410,7 +410,7 @@ export const deleteActivity = async (req: Request, res: Response): Promise<void>
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -426,7 +426,7 @@ export const deleteActivity = async (req: Request, res: Response): Promise<void>
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -437,7 +437,16 @@ export const deleteActivity = async (req: Request, res: Response): Promise<void>
     if (req.user.role === UserRole.ACTIVITY_HEAD && activity.Activity_Head_ID !== req.user.userId) {
       res.status(403).json({
         success: false,
-        message: 'You can only delete your own activities',
+        message: 'คุณสามารถลบได้เฉพาะกิจกรรมของตัวเองเท่านั้น',
+      });
+      return;
+    }
+
+    // Cannot delete approved activities
+    if (activity.Activity_Status === ActivityStatus.APPROVED) {
+      res.status(400).json({
+        success: false,
+        message: 'ไม่สามารถลบกิจกรรมที่ได้รับการอนุมัติแล้วได้',
       });
       return;
     }
@@ -451,7 +460,7 @@ export const deleteActivity = async (req: Request, res: Response): Promise<void>
     if (registrations[0].count > 0) {
       res.status(400).json({
         success: false,
-        message: 'Cannot delete activity with existing registrations',
+        message: 'ไม่สามารถลบกิจกรรมที่มีผู้ลงทะเบียนแล้วได้',
       });
       return;
     }
@@ -461,13 +470,13 @@ export const deleteActivity = async (req: Request, res: Response): Promise<void>
 
     res.status(200).json({
       success: true,
-      message: 'Activity deleted successfully',
+      message: 'ลบกิจกรรมสำเร็จ',
     });
   } catch (error) {
     console.error('Delete activity error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -481,7 +490,7 @@ export const approveActivity = async (req: Request, res: Response): Promise<void
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -497,7 +506,7 @@ export const approveActivity = async (req: Request, res: Response): Promise<void
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -508,7 +517,7 @@ export const approveActivity = async (req: Request, res: Response): Promise<void
     if (activity.Activity_Status !== ActivityStatus.PENDING) {
       res.status(400).json({
         success: false,
-        message: `Activity is already ${activity.Activity_Status}`,
+        message: activity.Activity_Status === 'approved' ? 'กิจกรรมนี้ได้รับการอนุมัติแล้ว' : 'กิจกรรมนี้ถูกปฏิเสธแล้ว',
       });
       return;
     }
@@ -521,13 +530,13 @@ export const approveActivity = async (req: Request, res: Response): Promise<void
 
     res.status(200).json({
       success: true,
-      message: 'Activity approved successfully',
+      message: 'อนุมัติกิจกรรมสำเร็จ',
     });
   } catch (error) {
     console.error('Approve activity error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -541,7 +550,7 @@ export const rejectActivity = async (req: Request, res: Response): Promise<void>
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -558,7 +567,7 @@ export const rejectActivity = async (req: Request, res: Response): Promise<void>
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -569,7 +578,7 @@ export const rejectActivity = async (req: Request, res: Response): Promise<void>
     if (activity.Activity_Status !== ActivityStatus.PENDING) {
       res.status(400).json({
         success: false,
-        message: `Activity is already ${activity.Activity_Status}`,
+        message: activity.Activity_Status === 'approved' ? 'กิจกรรมนี้ได้รับการอนุมัติแล้ว' : 'กิจกรรมนี้ถูกปฏิเสธแล้ว',
       });
       return;
     }
@@ -582,14 +591,14 @@ export const rejectActivity = async (req: Request, res: Response): Promise<void>
 
     res.status(200).json({
       success: true,
-      message: 'Activity rejected successfully',
-      reason: reason || 'No reason provided',
+      message: 'ปฏิเสธกิจกรรมสำเร็จ',
+      reason: reason || 'ไม่ได้ระบุเหตุผล',
     });
   } catch (error) {
     console.error('Reject activity error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -611,7 +620,7 @@ export const getActivityRegistrations = async (req: Request, res: Response): Pro
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -648,7 +657,7 @@ export const getActivityRegistrations = async (req: Request, res: Response): Pro
     console.error('Get activity registrations error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -662,7 +671,7 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -673,7 +682,7 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
     if (!Club_ID) {
       res.status(400).json({
         success: false,
-        message: 'Club_ID is required',
+        message: 'กรุณาระบุรหัสสโมสร',
       });
       return;
     }
@@ -687,7 +696,7 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
     if (activities.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Activity not found',
+        message: 'ไม่พบกิจกรรมที่ระบุ',
       });
       return;
     }
@@ -697,7 +706,7 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
     if (req.user.role === UserRole.ACTIVITY_HEAD && activity.Activity_Head_ID !== req.user.userId) {
       res.status(403).json({
         success: false,
-        message: 'You can only assign clubs to your own activities',
+        message: 'คุณสามารถมอบหมายสโมสรได้เฉพาะกิจกรรมของตัวเองเท่านั้น',
       });
       return;
     }
@@ -711,7 +720,7 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
     if (clubs.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'Club not found',
+        message: 'ไม่พบสโมสรที่ระบุ',
       });
       return;
     }
@@ -725,7 +734,7 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
     if (existing.length > 0) {
       res.status(409).json({
         success: false,
-        message: 'Club is already assigned to this activity',
+        message: 'สโมสรนี้ถูกมอบหมายให้กิจกรรมนี้แล้ว',
       });
       return;
     }
@@ -738,13 +747,13 @@ export const assignClubToActivity = async (req: Request, res: Response): Promise
 
     res.status(201).json({
       success: true,
-      message: 'Club assigned to activity successfully',
+      message: 'มอบหมายสโมสรให้กิจกรรมสำเร็จ',
     });
   } catch (error) {
     console.error('Assign club to activity error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -780,7 +789,7 @@ export const getAssignedClubs = async (req: Request, res: Response): Promise<voi
     console.error('Get assigned clubs error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }

@@ -16,7 +16,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!userId || !password || !role) {
       res.status(400).json({
         success: false,
-        message: 'User ID, password, and role are required',
+        message: 'กรุณากรอกรหัสผู้ใช้ รหัสผ่าน และประเภทผู้ใช้',
       });
       return;
     }
@@ -25,7 +25,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!Object.values(UserRole).includes(role)) {
       res.status(400).json({
         success: false,
-        message: 'Invalid role specified',
+        message: 'ประเภทผู้ใช้ไม่ถูกต้อง',
       });
       return;
     }
@@ -77,7 +77,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       default:
         res.status(400).json({
           success: false,
-          message: 'Invalid role',
+          message: 'ประเภทผู้ใช้ไม่ถูกต้อง',
         });
         return;
     }
@@ -91,7 +91,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (rows.length === 0) {
       res.status(401).json({
         success: false,
-        message: 'Invalid credentials',
+        message: 'รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
       });
       return;
     }
@@ -104,7 +104,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
-        message: 'Invalid credentials',
+        message: 'รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
       });
       return;
     }
@@ -119,7 +119,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Send response
     res.status(200).json({
       success: true,
-      message: 'Login successful',
+      message: 'เข้าสู่ระบบสำเร็จ',
       token,
       user: {
         id: user[idColumn],
@@ -132,7 +132,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -146,7 +146,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -187,7 +187,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
       default:
         res.status(400).json({
           success: false,
-          message: 'Invalid role',
+          message: 'ประเภทผู้ใช้ไม่ถูกต้อง',
         });
         return;
     }
@@ -205,7 +205,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     if (rows.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: 'ไม่พบข้อมูลผู้ใช้',
       });
       return;
     }
@@ -218,7 +218,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     console.error('Get profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -244,7 +244,7 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
     if (!Student_ID || !Student_Name || !Student_Password) {
       res.status(400).json({
         success: false,
-        message: 'Student ID, name, and password are required',
+        message: 'กรุณากรอกรหัสนักศึกษา ชื่อ และรหัสผ่าน',
       });
       return;
     }
@@ -254,7 +254,7 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
     if (!studentIdRegex.test(Student_ID)) {
       res.status(400).json({
         success: false,
-        message: 'Invalid student ID format. Expected format: 076760305034-9',
+        message: 'รูปแบบรหัสนักศึกษาไม่ถูกต้อง ตัวอย่าง: 076760305034-9',
       });
       return;
     }
@@ -268,7 +268,7 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
     if (existing.length > 0) {
       res.status(409).json({
         success: false,
-        message: 'Student ID already exists',
+        message: 'รหัสนักศึกษานี้มีอยู่ในระบบแล้ว',
       });
       return;
     }
@@ -285,7 +285,7 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
 
     res.status(201).json({
       success: true,
-      message: 'Student registered successfully',
+      message: 'สมัครสมาชิกสำเร็จ',
       data: {
         Student_ID,
         Student_Name,
@@ -296,7 +296,7 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
     console.error('Register student error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
@@ -310,7 +310,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     if (!req.user) {
       res.status(401).json({
         success: false,
-        message: 'User not authenticated',
+        message: 'กรุณาเข้าสู่ระบบก่อน',
       });
       return;
     }
@@ -322,7 +322,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     if (!currentPassword || !newPassword) {
       res.status(400).json({
         success: false,
-        message: 'Current password and new password are required',
+        message: 'กรุณากรอกรหัสผ่านปัจจุบันและรหัสผ่านใหม่',
       });
       return;
     }
@@ -331,7 +331,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     if (newPassword.length < 6) {
       res.status(400).json({
         success: false,
-        message: 'New password must be at least 6 characters long',
+        message: 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร',
       });
       return;
     }
@@ -365,7 +365,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       default:
         res.status(400).json({
           success: false,
-          message: 'Invalid role',
+          message: 'ประเภทผู้ใช้ไม่ถูกต้อง',
         });
         return;
     }
@@ -379,7 +379,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     if (rows.length === 0) {
       res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: 'ไม่พบข้อมูลผู้ใช้',
       });
       return;
     }
@@ -390,7 +390,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
-        message: 'Current password is incorrect',
+        message: 'รหัสผ่านปัจจุบันไม่ถูกต้อง',
       });
       return;
     }
@@ -406,13 +406,13 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 
     res.status(200).json({
       success: true,
-      message: 'Password changed successfully',
+      message: 'เปลี่ยนรหัสผ่านสำเร็จ',
     });
   } catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({
       success: false,
-      message: 'Internal server error',
+      message: 'เกิดข้อผิดพลาดภายในระบบ',
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }

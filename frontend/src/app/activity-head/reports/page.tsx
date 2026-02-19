@@ -53,6 +53,14 @@ export default function ActivityHeadReportsPage() {
     }
   };
 
+  const escapeCSV = (val: string) => {
+    if (!val) return '';
+    if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+      return `"${val.replace(/"/g, '""')}"`;
+    }
+    return val;
+  };
+
   const exportToCSV = async () => {
     setExporting(true);
     try {
@@ -60,23 +68,69 @@ export default function ActivityHeadReportsPage() {
         ? activities
         : activities.filter(a => a.Activity_ID === selectedExport);
 
-      const headers = ['รหัสกิจกรรม', 'ชื่อกิจกรรม', 'รายละเอียด', 'วันที่จัด', 'เวลา', 'สถานที่', 'ประเภท', 'ความจุสูงสุด', 'ผู้ลงทะเบียน', 'สถานะ', 'ปีการศึกษา'];
-      const rows = toExport.map(a => [
-        a.Activity_ID,
-        a.Activity_Name,
-        (a.Activity_Details || '').replace(/,/g, ' '),
-        a.Activity_Date ? new Date(a.Activity_Date).toLocaleDateString('th-TH') : '',
-        a.Activity_Time || '',
-        a.Activity_Location || '',
-        a.Activity_Type_Name || a.Activity_Type_ID || '',
-        a.Maximum_Capacity,
-        a.Current_Registrations || 0,
-        a.Activity_Status === 'approved' ? 'อนุมัติ' : a.Activity_Status === 'pending' ? 'รออนุมัติ' : 'ไม่อนุมัติ',
-        a.Academic_Year,
-      ]);
+      const allRows: string[][] = [];
+
+      for (const a of toExport) {
+        // Fetch registered students for this activity
+        let students: any[] = [];
+        try {
+          const regRes = await activitiesAPI.getRegistrations(a.Activity_ID);
+          if (regRes.success && regRes.data) {
+            students = regRes.data;
+          }
+        } catch { /* ignore */ }
+
+        const statusTh = a.Activity_Status === 'approved' ? 'อนุมัติ' : a.Activity_Status === 'pending' ? 'รออนุมัติ' : 'ไม่อนุมัติ';
+
+        if (students.length > 0) {
+          students.forEach((s: any) => {
+            allRows.push([
+              a.Activity_ID,
+              escapeCSV(a.Activity_Name),
+              a.Activity_Date ? new Date(a.Activity_Date).toLocaleDateString('th-TH') : '',
+              a.Activity_Time || '',
+              escapeCSV(a.Activity_Location || ''),
+              escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || ''),
+              String(a.Activity_Hours || 3),
+              String(a.Maximum_Capacity),
+              String(a.Current_Registrations || 0),
+              statusTh,
+              String(a.Academic_Year),
+              s.Student_ID || '',
+              escapeCSV(s.Student_Name || ''),
+              escapeCSV(s.Student_Email || ''),
+              escapeCSV(s.Faculty_Name || ''),
+              escapeCSV(s.Branch_Name || ''),
+              s.Has_CheckedIn ? 'เช็คอินแล้ว' : 'ยังไม่เช็คอิน',
+              s.CheckIn_Time ? new Date(s.CheckIn_Time).toLocaleString('th-TH') : '-',
+            ]);
+          });
+        } else {
+          allRows.push([
+            a.Activity_ID,
+            escapeCSV(a.Activity_Name),
+            a.Activity_Date ? new Date(a.Activity_Date).toLocaleDateString('th-TH') : '',
+            a.Activity_Time || '',
+            escapeCSV(a.Activity_Location || ''),
+            escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || ''),
+            String(a.Activity_Hours || 3),
+            String(a.Maximum_Capacity),
+            String(a.Current_Registrations || 0),
+            statusTh,
+            String(a.Academic_Year),
+            '', '', '', '', '', 'ไม่มีผู้ลงทะเบียน', '',
+          ]);
+        }
+      }
+
+      const headers = [
+        'รหัสกิจกรรม', 'ชื่อกิจกรรม', 'วันที่จัด', 'เวลา', 'สถานที่', 'ประเภท', 'ชั่วโมง',
+        'ความจุสูงสุด', 'ผู้ลงทะเบียน', 'สถานะ', 'ปีการศึกษา',
+        'รหัสนักศึกษา', 'ชื่อนักศึกษา', 'อีเมล', 'คณะ', 'สาขา', 'สถานะเข้าร่วม', 'เวลาเช็คอิน',
+      ];
 
       const BOM = '\uFEFF';
-      const csvContent = BOM + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const csvContent = BOM + [headers.join(','), ...allRows.map(r => r.join(','))].join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
