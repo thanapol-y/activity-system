@@ -14,6 +14,9 @@ export default function DeanApprovePage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – อนุมัติกิจกรรม'; }, []);
+
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);

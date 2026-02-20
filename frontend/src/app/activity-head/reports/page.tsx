@@ -15,6 +15,8 @@ export default function ActivityHeadReportsPage() {
   const [selectedExport, setSelectedExport] = useState<string>('all');
   const [exporting, setExporting] = useState(false);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – รายงานสรุป'; }, []);
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -61,6 +63,17 @@ export default function ActivityHeadReportsPage() {
     return val;
   };
 
+  const formatThaiDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    const day = days[d.getDay()];
+    const dd = d.getDate();
+    const mm = d.getMonth() + 1;
+    const yyyy = d.getFullYear() + 543;
+    return `วัน${day}ที่ ${dd}/${mm}/${yyyy}`;
+  };
+
   const exportToCSV = async () => {
     setExporting(true);
     try {
@@ -71,7 +84,6 @@ export default function ActivityHeadReportsPage() {
       const allRows: string[][] = [];
 
       for (const a of toExport) {
-        // Fetch registered students for this activity
         let students: any[] = [];
         try {
           const regRes = await activitiesAPI.getRegistrations(a.Activity_ID);
@@ -81,14 +93,16 @@ export default function ActivityHeadReportsPage() {
         } catch { /* ignore */ }
 
         const statusTh = a.Activity_Status === 'approved' ? 'อนุมัติ' : a.Activity_Status === 'pending' ? 'รออนุมัติ' : 'ไม่อนุมัติ';
+        const creator = a.Activity_Head_Name || '-';
 
         if (students.length > 0) {
-          students.forEach((s: any) => {
+          students.forEach((s: any, idx: number) => {
             allRows.push([
               a.Activity_ID,
               escapeCSV(a.Activity_Name),
-              a.Activity_Date ? new Date(a.Activity_Date).toLocaleDateString('th-TH') : '',
-              a.Activity_Time || '',
+              escapeCSV(a.Activity_Details || ''),
+              formatThaiDate(a.Activity_Date),
+              a.Activity_Time ? a.Activity_Time.substring(0, 5) : '',
               escapeCSV(a.Activity_Location || ''),
               escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || ''),
               String(a.Activity_Hours || 3),
@@ -96,37 +110,42 @@ export default function ActivityHeadReportsPage() {
               String(a.Current_Registrations || 0),
               statusTh,
               String(a.Academic_Year),
+              String(idx + 1),
               s.Student_ID || '',
               escapeCSV(s.Student_Name || ''),
               escapeCSV(s.Student_Email || ''),
               escapeCSV(s.Faculty_Name || ''),
               escapeCSV(s.Branch_Name || ''),
-              s.Has_CheckedIn ? 'เช็คอินแล้ว' : 'ยังไม่เช็คอิน',
+              s.Has_CheckedIn ? 'เข้าร่วมแล้ว' : 'ยังไม่ได้เข้าร่วม',
               s.CheckIn_Time ? new Date(s.CheckIn_Time).toLocaleString('th-TH') : '-',
+              escapeCSV(creator),
             ]);
           });
         } else {
           allRows.push([
             a.Activity_ID,
             escapeCSV(a.Activity_Name),
-            a.Activity_Date ? new Date(a.Activity_Date).toLocaleDateString('th-TH') : '',
-            a.Activity_Time || '',
+            escapeCSV(a.Activity_Details || ''),
+            formatThaiDate(a.Activity_Date),
+            a.Activity_Time ? a.Activity_Time.substring(0, 5) : '',
             escapeCSV(a.Activity_Location || ''),
             escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || ''),
             String(a.Activity_Hours || 3),
             String(a.Maximum_Capacity),
-            String(a.Current_Registrations || 0),
+            '0',
             statusTh,
             String(a.Academic_Year),
-            '', '', '', '', '', 'ไม่มีผู้ลงทะเบียน', '',
+            '', '', '', '', '', '', 'ไม่มีผู้ลงทะเบียน', '',
+            escapeCSV(creator),
           ]);
         }
       }
 
       const headers = [
-        'รหัสกิจกรรม', 'ชื่อกิจกรรม', 'วันที่จัด', 'เวลา', 'สถานที่', 'ประเภท', 'ชั่วโมง',
-        'ความจุสูงสุด', 'ผู้ลงทะเบียน', 'สถานะ', 'ปีการศึกษา',
-        'รหัสนักศึกษา', 'ชื่อนักศึกษา', 'อีเมล', 'คณะ', 'สาขา', 'สถานะเข้าร่วม', 'เวลาเช็คอิน',
+        'รหัสกิจกรรม', 'ชื่อกิจกรรม', 'รายละเอียด', 'วันที่จัด', 'เวลา', 'สถานที่', 'ประเภท', 'ชั่วโมง',
+        'ความจุสูงสุด', 'สมัครแล้ว', 'สถานะ', 'ปีการศึกษา',
+        'ลำดับ', 'รหัสนักศึกษา', 'ชื่อนักศึกษา', 'อีเมล', 'คณะ', 'สาขา', 'สถานะเข้าร่วม', 'เวลาเช็คอิน',
+        'ผู้สร้าง',
       ];
 
       const BOM = '\uFEFF';

@@ -20,6 +20,9 @@ export default function StudentActivitiesPage() {
   const [registering, setRegistering] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – กิจกรรมทั้งหมด'; }, []);
+
   const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<'date' | 'participants' | 'type' | 'hours'>('date');
   const [detailActivity, setDetailActivity] = useState<Activity | null>(null);

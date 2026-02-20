@@ -21,6 +21,9 @@ export default function MyActivitiesPage() {
   const [cancelling, setCancelling] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – กิจกรรมของฉัน'; }, []);
+
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
 
 
@@ -497,7 +500,15 @@ export default function MyActivitiesPage() {
 
                                 <span className="px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
 
-                                  ✓ เข้าร่วมแล้ว
+                                  ✓ เข้าร่วมแล้ว {registration.Activity_Hours ? `(${registration.Activity_Hours} ชั่วโมง)` : ''}
+
+                                </span>
+
+                              ) : registration.Activity_Date && new Date(registration.Activity_Date) < new Date() ? (
+
+                                <span className="px-3 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full">
+
+                                  เลยเวลาสแกนเข้าร่วมกิจกรรมแล้ว
 
                                 </span>
 
@@ -526,19 +537,29 @@ export default function MyActivitiesPage() {
                           >
                             ดูรายละเอียด
                           </button>
-                          <button
-                            onClick={() => handleViewQR(registration)}
-                            className="px-4 py-2 bg-[#2B4C8C] hover:bg-[#1e3563] text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-                          >
-                            QR Code
-                          </button>
-                          {!registration.Has_CheckedIn && (
-                            <button
-                              onClick={() => handleCancelClick(registration)}
-                              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
-                            >
-                              ยกเลิก
-                            </button>
+                          {registration.Has_CheckedIn ? (
+                            <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium whitespace-nowrap text-center">
+                              ✓ เข้าร่วมแล้ว
+                            </span>
+                          ) : registration.Activity_Date && new Date(registration.Activity_Date) < new Date() ? (
+                            <span className="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium whitespace-nowrap text-center">
+                              เลยเวลาแล้ว
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleViewQR(registration)}
+                                className="px-4 py-2 bg-[#2B4C8C] hover:bg-[#1e3563] text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+                              >
+                                QR Code
+                              </button>
+                              <button
+                                onClick={() => handleCancelClick(registration)}
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium whitespace-nowrap"
+                              >
+                                ยกเลิก
+                              </button>
+                            </>
                           )}
                         </div>
 

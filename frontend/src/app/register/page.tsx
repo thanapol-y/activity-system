@@ -21,6 +21,8 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<string[]>([]);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – สมัครสมาชิก'; }, []);
   const [success, setSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

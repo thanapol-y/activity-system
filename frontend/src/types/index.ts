@@ -78,6 +78,8 @@ export interface Activity {
   Maximum_Capacity: number;
   Activity_Hours?: number;
   Current_Registrations?: number;
+  Registration_End_Time?: string;
+  Activity_End_Time?: string;
   Deadline: string;
   Activity_Status: ActivityStatus;
   Dean_ID: string | null;
@@ -230,6 +232,8 @@ export interface CreateActivityForm {
   Activity_Location: string;
   Maximum_Capacity: number;
   Activity_Hours: number;
+  Registration_End_Time?: string;
+  Activity_End_Time?: string;
   Deadline: string;
 }
 

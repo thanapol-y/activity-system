@@ -11,6 +11,8 @@ export default function StudentProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – โปรไฟล์'; }, []);
+
   useEffect(() => {
     const loadProfile = async () => {
       try {

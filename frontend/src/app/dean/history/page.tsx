@@ -18,6 +18,8 @@ interface ApprovalRecord {
 export default function DeanHistoryPage() {
   const { user } = useAuth();
   const [records, setRecords] = useState<ApprovalRecord[]>([]);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – ประวัติการอนุมัติ'; }, []);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);

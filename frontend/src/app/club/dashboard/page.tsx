@@ -19,6 +19,8 @@ export default function ClubDashboardPage() {
   const [reportSubmitting, setReportSubmitting] = useState(false);
   const [reportError, setReportError] = useState('');
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – แดชบอร์ดสโมสร'; }, []);
+
   useEffect(() => {
     loadData();
   }, []);

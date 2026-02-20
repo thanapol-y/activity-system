@@ -30,6 +30,8 @@ export default function ActivityHeadActivitiesPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – จัดการกิจกรรม'; }, []);
+
   // Modal states
   const [showFormModal, setShowFormModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -40,6 +42,15 @@ export default function ActivityHeadActivitiesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [activityTypes, setActivityTypes] = useState<ActivityType[]>([]);
+  const [yearFilter, setYearFilter] = useState<number>(new Date().getFullYear() + 543);
+  const [showRegistrantsModal, setShowRegistrantsModal] = useState(false);
+  const [registrantsActivity, setRegistrantsActivity] = useState<Activity | null>(null);
+  const [registrants, setRegistrants] = useState<any[]>([]);
+  const [loadingRegistrants, setLoadingRegistrants] = useState(false);
+  const [showExtendModal, setShowExtendModal] = useState(false);
+  const [extendActivity, setExtendActivity] = useState<Activity | null>(null);
+  const [extendTime, setExtendTime] = useState('');
+  const [extendReason, setExtendReason] = useState('');
 
   const loadActivities = useCallback(async () => {
     try {
@@ -76,6 +87,26 @@ export default function ActivityHeadActivitiesPage() {
     loadActivityTypes();
   }, [loadActivities, loadActivityTypes]);
 
+  // Get unique years from activities
+  const availableYears = Array.from(new Set(activities.map(a => a.Academic_Year))).sort((a, b) => b - a);
+  if (availableYears.length > 0 && !availableYears.includes(yearFilter)) {
+    // include current filter year
+  }
+
+  // View registrants
+  const handleViewRegistrants = async (activity: Activity) => {
+    setRegistrantsActivity(activity);
+    setShowRegistrantsModal(true);
+    setLoadingRegistrants(true);
+    try {
+      const res = await activitiesAPI.getRegistrations(activity.Activity_ID);
+      if (res.success && res.data) {
+        setRegistrants(res.data);
+      }
+    } catch { setRegistrants([]); }
+    finally { setLoadingRegistrants(false); }
+  };
+
   // Filter activities
   const filteredActivities = activities.filter((activity) => {
     const matchesSearch =
@@ -87,7 +118,9 @@ export default function ActivityHeadActivitiesPage() {
     const matchesStatus =
       statusFilter === 'all' || activity.Activity_Status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    const matchesYear = activity.Academic_Year === yearFilter;
+
+    return matchesSearch && matchesStatus && matchesYear;
   });
 
   // Stats
@@ -298,7 +331,7 @@ export default function ActivityHeadActivitiesPage() {
 
         {/* Search & Filter */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">ค้นหากิจกรรม</label>
               <input
@@ -308,6 +341,18 @@ export default function ActivityHeadActivitiesPage() {
                 placeholder="ค้นหาชื่อกิจกรรม..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white placeholder:text-gray-400"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">ปีการศึกษา</label>
+              <select
+                value={yearFilter}
+                onChange={(e) => setYearFilter(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white"
+              >
+                {(availableYears.length > 0 ? availableYears : [new Date().getFullYear() + 543]).map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">สถานะ</label>
@@ -324,7 +369,7 @@ export default function ActivityHeadActivitiesPage() {
             </div>
             <div>
               <button
-                onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+                onClick={() => { setSearchTerm(''); setStatusFilter('all'); setYearFilter(new Date().getFullYear() + 543); }}
                 className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 ล้างตัวกรอง
@@ -394,6 +439,12 @@ export default function ActivityHeadActivitiesPage() {
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-center">
                           <div className="flex gap-1 justify-center flex-wrap">
+                            <button
+                              onClick={() => handleViewRegistrants(activity)}
+                              className="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                            >
+                              ดูรายชื่อ
+                            </button>
                             {activity.Activity_Status === 'approved' ? (
                               <span className="px-3 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed" title="ไม่สามารถแก้ไขกิจกรรมที่อนุมัติแล้วได้">
                                 แก้ไข
@@ -532,8 +583,8 @@ export default function ActivityHeadActivitiesPage() {
                   />
                 </div>
 
-                {/* Capacity, Hours & Deadline */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Capacity & Hours */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       จำนวนผู้เข้าร่วมสูงสุด <span className="text-red-500">*</span>
@@ -571,6 +622,10 @@ export default function ActivityHeadActivitiesPage() {
                     />
                     <p className="mt-1 text-xs text-gray-500">จำนวนชั่วโมงที่ได้รับเมื่อเข้าร่วม</p>
                   </div>
+                </div>
+
+                {/* Time Management */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       วันและเวลาปิดรับสมัคร <span className="text-red-500">*</span>
@@ -583,6 +638,32 @@ export default function ActivityHeadActivitiesPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white"
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      เวลาสิ้นสุดการลงทะเบียน (สแกน)
+                    </label>
+                    <input
+                      type="time"
+                      name="Registration_End_Time"
+                      value={formData.Registration_End_Time || ''}
+                      onChange={handleFormChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">หมดเวลาสแกนเข้าร่วม เช่น 10:00</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      เวลาสิ้นสุดกิจกรรม
+                    </label>
+                    <input
+                      type="time"
+                      name="Activity_End_Time"
+                      value={formData.Activity_End_Time || ''}
+                      onChange={handleFormChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">เวลาจบกิจกรรม เช่น 16:00</p>
                   </div>
                 </div>
 
@@ -658,6 +739,129 @@ export default function ActivityHeadActivitiesPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Registrants Modal ===== */}
+      {showRegistrantsModal && registrantsActivity && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800">รายชื่อผู้ลงทะเบียน</h3>
+                <button onClick={() => setShowRegistrantsModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">กิจกรรม: <strong>{registrantsActivity.Activity_Name}</strong></p>
+              {loadingRegistrants ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#2B4C8C]"></div>
+                  <p className="mt-2 text-gray-500">กำลังโหลด...</p>
+                </div>
+              ) : registrants.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">ยังไม่มีผู้ลงทะเบียน</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">#</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">รหัสนักศึกษา</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">ชื่อ-นามสกุล</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">สถานะเข้าร่วม</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {registrants.map((s: any, i: number) => (
+                        <tr key={s.Student_ID} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 text-gray-600">{i + 1}</td>
+                          <td className="px-3 py-2 text-gray-800">{s.Student_ID}</td>
+                          <td className="px-3 py-2 text-gray-800">{s.Student_Name || '-'}</td>
+                          <td className="px-3 py-2 text-center">
+                            {s.Has_CheckedIn ? (
+                              <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">เช็คอินแล้ว</span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">ยังไม่เช็คอิน</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="mt-3 text-sm text-gray-500">รวม {registrants.length} คน | เช็คอินแล้ว {registrants.filter((s: any) => s.Has_CheckedIn).length} คน</p>
+                </div>
+              )}
+              <div className="flex justify-between items-center mt-4 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    setExtendActivity(registrantsActivity);
+                    setExtendTime('');
+                    setExtendReason('');
+                    setShowExtendModal(true);
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-orange-700 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                >
+                  ขยายเวลาสิ้นสุดการลงทะเบียน
+                </button>
+                <button onClick={() => setShowRegistrantsModal(false)} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">ปิด</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Extend Deadline Modal ===== */}
+      {showExtendModal && extendActivity && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">ขยายเวลาสิ้นสุดการลงทะเบียน</h3>
+              <p className="text-sm text-gray-600 mb-4">กิจกรรม: <strong>{extendActivity.Activity_Name}</strong></p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">เวลาสิ้นสุดใหม่ <span className="text-red-500">*</span></label>
+                  <input
+                    type="time"
+                    value={extendTime}
+                    onChange={(e) => setExtendTime(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">เหตุผลในการขยายเวลา <span className="text-red-500">*</span></label>
+                  <textarea
+                    value={extendReason}
+                    onChange={(e) => setExtendReason(e.target.value)}
+                    rows={3}
+                    placeholder="เช่น มีนักศึกษามาสายจำนวนมาก"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    if (!extendTime || !extendReason.trim()) {
+                      setMessage({ type: 'error', text: 'กรุณากรอกเวลาและเหตุผล' });
+                      setShowAlertModal(true);
+                      return;
+                    }
+                    setMessage({ type: 'success', text: `ขยายเวลาสิ้นสุดการลงทะเบียนเป็น ${extendTime} น. เรียบร้อยแล้ว\nเหตุผล: ${extendReason}` });
+                    setShowAlertModal(true);
+                    setShowExtendModal(false);
+                  }}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  ยืนยันขยายเวลา
+                </button>
+                <button
+                  onClick={() => setShowExtendModal(false)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
             </div>
           </div>
         </div>

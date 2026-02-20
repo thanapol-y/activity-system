@@ -38,7 +38,6 @@ export default function Navbar() {
         return [
           { label: 'หน้าหลัก', href: '/activity-head/dashboard' },
           { label: 'จัดการกิจกรรม', href: '/activity-head/activities' },
-          { label: 'ผู้ลงทะเบียน', href: '/activity-head/students' },
           { label: 'รายงาน', href: '/activity-head/reports' },
         ];
       case UserRole.CLUB:

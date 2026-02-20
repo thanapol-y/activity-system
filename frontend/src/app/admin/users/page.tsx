@@ -99,6 +99,8 @@ export default function AdminUsersPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – จัดการผู้ใช้'; }, []);
+
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);

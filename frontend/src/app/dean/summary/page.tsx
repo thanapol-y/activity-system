@@ -13,6 +13,8 @@ export default function DeanSummaryPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – สรุปภาพรวมกิจกรรม'; }, []);
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);

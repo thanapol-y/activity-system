@@ -16,6 +16,8 @@ export default function ClubRegistrationsPage() {
   const [loadingRegs, setLoadingRegs] = useState(false);
   const [search, setSearch] = useState('');
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – รายชื่อผู้ลงทะเบียน'; }, []);
+
   const loadActivities = useCallback(async () => {
     try {
       setLoading(true);

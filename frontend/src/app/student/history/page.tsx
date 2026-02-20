@@ -13,6 +13,8 @@ export default function StudentHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'attended' | 'missed'>('all');
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – ประวัติกิจกรรม'; }, []);
+
   const loadHistory = useCallback(async () => {
     try {
       setLoading(true);

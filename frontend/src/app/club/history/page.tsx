@@ -18,6 +18,8 @@ export default function ClubHistoryPage() {
   const [allCheckins, setAllCheckins] = useState<AllCheckIn[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'time' | 'activity' | 'type'>('time');
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – ประวัติเช็คอิน'; }, []);
   const [search, setSearch] = useState('');
 
   const loadAllData = useCallback(async () => {

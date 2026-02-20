@@ -31,6 +31,8 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – เข้าสู่ระบบ'; }, []);
   const [showQuickLogin, setShowQuickLogin] = useState(false);
 
   const roleOptions = [

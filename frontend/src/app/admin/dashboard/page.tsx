@@ -14,6 +14,8 @@ export default function AdminDashboardPage() {
   const [userCounts, setUserCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – แดชบอร์ดผู้ดูแลระบบ'; }, []);
+
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
@@ -58,7 +60,7 @@ export default function AdminDashboardPage() {
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
-          <p className="text-sm md:text-base text-gray-600">ภาพรวมข้อมูลระบบทั้งหมด กดเมนู "จัดการผู้ใช้" ด้านบนเพื่อเพิ่ม/แก้ไข/ลบผู้ใช้งานทุก Role</p>
+          <p className="text-sm md:text-base text-gray-600">ภาพรวมจำนวนผู้ใช้และสถิติกิจกรรมในระบบทั้งหมด</p>
         </div>
 
         {loading ? (

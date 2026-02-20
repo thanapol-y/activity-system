@@ -16,6 +16,8 @@ export default function ActivityHeadDashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [reports, setReports] = useState<ProblemReport[]>([]);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – แดชบอร์ดหัวหน้ากิจกรรม'; }, []);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -82,7 +84,7 @@ export default function ActivityHeadDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Dashboard หัวหน้ากิจกรรม</h1>
-            <p className="text-sm md:text-base text-gray-600">กดปุ่ม "สร้างกิจกรรม" เพื่อเพิ่มกิจกรรมใหม่ หรือดูรายชื่อผู้ลงทะเบียนได้ที่เมนูด้านบน</p>
+            <p className="text-sm md:text-base text-gray-600">ภาพรวมกิจกรรมที่สร้างและจำนวนผู้ลงทะเบียนทั้งหมด</p>
           </div>
           <Link
             href="/activity-head/activities"

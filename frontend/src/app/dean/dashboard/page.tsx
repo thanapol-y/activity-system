@@ -13,6 +13,9 @@ export default function DeanDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [yearFilter, setYearFilter] = useState<number>(new Date().getFullYear() + 543);
+
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – แดชบอร์ดรองคณบดี'; }, []);
 
   const loadData = useCallback(async () => {
     try {
@@ -36,12 +39,26 @@ export default function DeanDashboardPage() {
 
   if (!user) return null;
 
-  const activityByStatus = stats?.activitiesByStatus || [];
-  const approvedCount = activityByStatus.find(s => s.Activity_Status === 'approved')?.count || 0;
-  const pendingCount = activityByStatus.find(s => s.Activity_Status === 'pending')?.count || 0;
-  const rejectedCount = activityByStatus.find(s => s.Activity_Status === 'rejected')?.count || 0;
+  const availableYears = Array.from(new Set(activities.map(a => a.Academic_Year))).sort((a, b) => b - a);
+  const filteredActivities = activities.filter(a => a.Academic_Year === yearFilter);
 
-  const pendingActivities = activities.filter(a => a.Activity_Status === 'pending');
+  const approvedCount = filteredActivities.filter(a => a.Activity_Status === 'approved').length;
+  const pendingCount = filteredActivities.filter(a => a.Activity_Status === 'pending').length;
+  const rejectedCount = filteredActivities.filter(a => a.Activity_Status === 'rejected').length;
+
+  const pendingActivities = filteredActivities.filter(a => a.Activity_Status === 'pending');
+
+  // Activity type breakdown
+  const typeMap = new Map<string, { name: string; count: number; regs: number; hours: number }>();
+  filteredActivities.forEach(a => {
+    const typeName = a.Activity_Type_Name || 'ทั่วไป';
+    const existing = typeMap.get(typeName) || { name: typeName, count: 0, regs: 0, hours: 0 };
+    existing.count++;
+    existing.regs += a.Current_Registrations || 0;
+    existing.hours += a.Activity_Hours || 3;
+    typeMap.set(typeName, existing);
+  });
+  const activityTypeStats = Array.from(typeMap.values()).sort((a, b) => b.count - a.count);
 
   const formatDate = (d?: string) => {
     if (!d) return '-';
@@ -53,9 +70,23 @@ export default function DeanDashboardPage() {
       <Navbar />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Dashboard รองคณบดี</h1>
-          <p className="text-sm md:text-base text-gray-600">สถานะการอนุมัติกิจกรรม</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Dashboard รองคณบดี</h1>
+            <p className="text-sm md:text-base text-gray-600">ภาพรวมสถานะการอนุมัติและสถิติกิจกรรมทั้งหมด</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">ปีการศึกษา:</label>
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(Number(e.target.value))}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white"
+            >
+              {(availableYears.length > 0 ? availableYears : [new Date().getFullYear() + 543]).map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {loading ? (
@@ -144,6 +175,34 @@ export default function DeanDashboardPage() {
                         <Link href="/dean/approve" className="px-4 py-2 bg-[#2B4C8C] text-white text-sm rounded-lg hover:bg-[#1e3a6e] transition-colors whitespace-nowrap">
                           พิจารณา
                         </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Activity Type Breakdown */}
+            {activityTypeStats.length > 0 && (
+              <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">สรุปแยกตามประเภทกิจกรรม (ปี {yearFilter})</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {activityTypeStats.map((t) => (
+                    <div key={t.name} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                      <h4 className="font-semibold text-gray-800 text-sm mb-2">{t.name}</h4>
+                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div>
+                          <p className="text-gray-500">กิจกรรม</p>
+                          <p className="text-lg font-bold text-[#2B4C8C]">{t.count}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">ผู้ลงทะเบียน</p>
+                          <p className="text-lg font-bold text-green-600">{t.regs}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">ชม.รวม</p>
+                          <p className="text-lg font-bold text-purple-600">{t.hours}</p>
+                        </div>
                       </div>
                     </div>
                   ))}

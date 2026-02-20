@@ -30,6 +30,8 @@ export default function ClubScanPage() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [recentCheckins, setRecentCheckins] = useState<ScanResult[]>([]);
 
+  React.useEffect(() => { document.title = 'ระบบลงทะเบียน – สแกน QR Code'; }, []);
+
   // Cleanup camera on unmount
   useEffect(() => {
     return () => {
