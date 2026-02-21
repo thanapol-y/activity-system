@@ -370,6 +370,52 @@ export const getQRCode = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
+ * Check check-in status for a specific activity (Student polling)
+ */
+export const getCheckInStatus = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: "กรุณาเข้าสู่ระบบก่อน" });
+      return;
+    }
+
+    const { activityId } = req.params;
+    const Student_ID = req.user.userId;
+
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT ci.CheckIn_Time, a.Activity_Name, a.Activity_Hours
+       FROM check_in ci
+       INNER JOIN activity a ON ci.Activity_ID = a.Activity_ID
+       WHERE ci.Student_ID = ? AND ci.Activity_ID = ?`,
+      [Student_ID, activityId],
+    );
+
+    if (rows.length > 0) {
+      res.json({
+        success: true,
+        data: {
+          checkedIn: true,
+          CheckIn_Time: rows[0].CheckIn_Time,
+          Activity_Name: rows[0].Activity_Name,
+          Activity_Hours: rows[0].Activity_Hours || 3,
+        },
+      });
+    } else {
+      res.json({
+        success: true,
+        data: { checkedIn: false },
+      });
+    }
+  } catch (error) {
+    console.error("Get check-in status error:", error);
+    res.status(500).json({ success: false, message: "เกิดข้อผิดพลาด" });
+  }
+};
+
+/**
  * Check-in student with QR code (Club only)
  */
 export const checkInWithQRCode = async (

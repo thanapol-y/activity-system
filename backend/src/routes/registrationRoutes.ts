@@ -4,6 +4,7 @@ import {
   cancelRegistration,
   getMyRegistrations,
   getQRCode,
+  getCheckInStatus,
   checkInWithQRCode,
   getCheckInHistory,
   getActivityHistory,
@@ -43,6 +44,13 @@ router.get('/my', authenticate, isStudent, getMyRegistrations);
  * @access  Private (Student only)
  */
 router.get('/qr/:activityId', authenticate, isStudent, getQRCode);
+
+/**
+ * @route   GET /api/registrations/checkin-status/:activityId
+ * @desc    Check if student has been checked in for an activity (for polling)
+ * @access  Private (Student only)
+ */
+router.get('/checkin-status/:activityId', authenticate, isStudent, getCheckInStatus);
 
 /**
  * @route   POST /api/registrations/checkin

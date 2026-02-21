@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -21,10 +21,13 @@ export default function MyActivitiesPage() {
   const [cancelling, setCancelling] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAlertModal, setShowAlertModal] = useState(false);
+  const [showCheckInSuccess, setShowCheckInSuccess] = useState(false);
+  const [checkInData, setCheckInData] = useState<{ activityName: string; hours: number } | null>(null);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => { document.title = 'ระบบลงทะเบียน – กิจกรรมของฉัน'; }, []);
 
-  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
+  const [filter, setFilter] = useState<'waiting' | 'completed'>('waiting');
 
 
 
@@ -67,38 +70,61 @@ export default function MyActivitiesPage() {
 
 
 
+  // Stop polling when component unmounts
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
+
+  const startPollingCheckIn = useCallback((activityId: string) => {
+    if (pollingRef.current) clearInterval(pollingRef.current);
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await registrationAPI.getCheckInStatus(activityId);
+        if (res.success && res.data?.checkedIn) {
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          pollingRef.current = null;
+          setShowQRModal(false);
+          setCheckInData({
+            activityName: res.data.Activity_Name,
+            hours: res.data.Activity_Hours || 3,
+          });
+          setShowCheckInSuccess(true);
+          loadRegistrations();
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 3000);
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
   const handleViewQR = async (registration: Registration) => {
-
     setSelectedActivity(registration);
-
     setShowQRModal(true);
-
     setLoadingQR(true);
 
-
-
     try {
-
       const response = await registrationAPI.getQRCode(registration.Activity_ID);
-
       if (response.success && response.data) {
-
         setQrCode(response.data.qrCode);
-
+        // Start polling for check-in status
+        startPollingCheckIn(registration.Activity_ID);
       }
-
     } catch (error) {
-
       setMessage({ type: 'error', text: 'ไม่สามารถโหลด QR Code ได้' });
       setShowAlertModal(true);
       setShowQRModal(false);
-
     } finally {
-
       setLoadingQR(false);
-
     }
-
   };
 
 
@@ -175,29 +201,14 @@ export default function MyActivitiesPage() {
 
 
   const getFilteredRegistrations = () => {
-
-    const now = new Date();
-
     // Only show registered (not cancelled) registrations
-
     const activeRegs = registrations.filter((reg) => reg.Registration_Status !== 'cancelled');
 
-    return activeRegs.filter((reg) => {
-
-      if (filter === 'upcoming') {
-
-        return reg.Activity_Date && new Date(reg.Activity_Date) >= now;
-
-      } else if (filter === 'past') {
-
-        return reg.Activity_Date && new Date(reg.Activity_Date) < now;
-
-      }
-
-      return true;
-
-    });
-
+    if (filter === 'waiting') {
+      return activeRegs.filter((reg) => !reg.Has_CheckedIn);
+    } else {
+      return activeRegs.filter((reg) => reg.Has_CheckedIn);
+    }
   };
 
 
@@ -247,33 +258,29 @@ export default function MyActivitiesPage() {
 
 
         {/* Filter Tabs */}
-
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="flex space-x-2">
-
             <button
-
-              onClick={() => setFilter('all')}
-
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-
-                filter === 'all'
-
+              onClick={() => setFilter('waiting')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
+                filter === 'waiting'
                   ? 'bg-[#2B4C8C] text-white'
-
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-
               }`}
-
             >
-
-              ทั้งหมด ({registrations.length})
-
+              รอเข้าร่วม ({registrations.filter(r => r.Registration_Status !== 'cancelled' && !r.Has_CheckedIn).length})
             </button>
-
+            <button
+              onClick={() => setFilter('completed')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
+                filter === 'completed'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              เข้าร่วมแล้ว ({registrations.filter(r => r.Registration_Status !== 'cancelled' && r.Has_CheckedIn).length})
+            </button>
           </div>
-
         </div>
 
 
@@ -643,24 +650,21 @@ export default function MyActivitiesPage() {
 
 
 
-              <p className="text-xs text-center text-gray-500 mb-6">
-
+              <p className="text-xs text-center text-gray-500 mb-2">
                 แสดง QR Code นี้ให้เจ้าหน้าที่สแกนในวันงาน
-
               </p>
 
-
+              {/* Polling indicator */}
+              <div className="flex items-center justify-center gap-2 mb-4 py-2 bg-blue-50 rounded-lg">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2B4C8C]"></div>
+                <p className="text-xs text-blue-700 font-medium">กำลังรอการสแกนจากเจ้าหน้าที่...</p>
+              </div>
 
               <button
-
-                onClick={() => setShowQRModal(false)}
-
+                onClick={() => { stopPolling(); setShowQRModal(false); }}
                 className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
-
               >
-
                 ปิด
-
               </button>
 
             </div>
@@ -809,6 +813,37 @@ export default function MyActivitiesPage() {
 
         </div>
 
+      )}
+
+      {/* Check-in Success Popup */}
+      {showCheckInSuccess && checkInData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden animate-[fadeIn_0.3s_ease]">
+            <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 text-center">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white">เช็คอินสำเร็จ!</h3>
+            </div>
+            <div className="p-6 text-center">
+              <p className="text-gray-800 font-semibold text-lg mb-2">{checkInData.activityName}</p>
+              <div className="bg-green-50 rounded-xl p-4 mb-4">
+                <p className="text-sm text-gray-600 mb-1">คุณได้รับ</p>
+                <p className="text-3xl font-bold text-green-600">{checkInData.hours}</p>
+                <p className="text-sm text-gray-600">ชั่วโมงกิจกรรม</p>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">ระบบบันทึกการเข้าร่วมกิจกรรมของคุณเรียบร้อยแล้ว</p>
+              <button
+                onClick={() => { setShowCheckInSuccess(false); setCheckInData(null); }}
+                className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
+              >
+                ตกลง
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

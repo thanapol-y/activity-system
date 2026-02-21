@@ -268,6 +268,10 @@ export const registrationAPI = {
     );
   },
 
+  getCheckInStatus: async (activityId: string): Promise<ApiResponse<any>> => {
+    return apiRequest<ApiResponse<any>>(`/registrations/checkin-status/${activityId}`);
+  },
+
   getActivityHistory: async (): Promise<ApiResponse<Registration[]>> => {
     return apiRequest<ApiResponse<Registration[]>>("/registrations/history");
   },
