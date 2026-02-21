@@ -353,27 +353,48 @@ export default function DatabaseManagementPage() {
 
                 {/* SQL Console */}
                 <div className="bg-white rounded-xl shadow-md p-4">
-                  <h3 className="font-semibold text-gray-800 mb-3 text-sm flex items-center gap-2">
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                    </svg>
-                    SQL Console
-                  </h3>
-                  <div className="flex gap-2 mb-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
+                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      SQL Console
+                    </h3>
+                    <label className="px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-lg hover:bg-blue-100 transition-colors cursor-pointer flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      นำเข้าไฟล์ .sql
+                      <input type="file" accept=".sql,.txt" className="hidden" onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => { setSqlQuery(ev.target?.result as string || ''); };
+                          reader.readAsText(file);
+                        }
+                        e.target.value = '';
+                      }} />
+                    </label>
+                  </div>
+                  <div className="mb-3">
                     <textarea
                       value={sqlQuery}
                       onChange={(e) => setSqlQuery(e.target.value)}
-                      placeholder="พิมพ์ SQL query เช่น SELECT * FROM activity WHERE Activity_Name LIKE '%ว่าว%'"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none resize-y min-h-[60px] text-gray-900"
-                      rows={2}
+                      onKeyDown={(e) => { if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); handleExecuteSQL(); } }}
+                      placeholder={"พิมพ์ SQL หรือนำเข้าไฟล์ .sql ได้เลย\nรองรับหลายคำสั่งพร้อมกัน เช่น INSERT, UPDATE, DELETE, SELECT\nกด Ctrl+Enter เพื่อรัน"}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none resize-y min-h-[120px] text-gray-900 bg-white"
+                      rows={5}
                     />
-                    <button
-                      onClick={handleExecuteSQL}
-                      disabled={sqlLoading || !sqlQuery.trim()}
-                      className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 self-end whitespace-nowrap"
-                    >
-                      {sqlLoading ? "กำลังรัน..." : "▶ Execute"}
-                    </button>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-[10px] text-gray-400">รองรับ: SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP | หลายคำสั่งคั่นด้วย ; | Ctrl+Enter = รัน</p>
+                      <button
+                        onClick={handleExecuteSQL}
+                        disabled={sqlLoading || !sqlQuery.trim()}
+                        className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {sqlLoading ? "กำลังรัน..." : "▶ Execute"}
+                      </button>
+                    </div>
                   </div>
                   {sqlError && (
                     <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg p-3 mb-3 font-mono">{sqlError}</div>

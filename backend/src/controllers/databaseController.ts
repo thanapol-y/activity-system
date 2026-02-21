@@ -206,7 +206,7 @@ export const deleteRow = async (req: Request, res: Response): Promise<void> => {
 };
 
 /**
- * Execute raw SQL (SELECT only for safety)
+ * Execute raw SQL - supports multiple statements separated by semicolons
  */
 export const executeQuery = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -217,25 +217,71 @@ export const executeQuery = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const trimmed = sql.trim().toUpperCase();
+    // Split into individual statements, remove comments and empty lines
+    const statements = sql
+      .split(/;\s*\n|;\s*$/)
+      .map(s => s.replace(/--.*$/gm, '').trim())
+      .filter(s => s.length > 0 && !s.toUpperCase().startsWith('USE '));
 
-    // Allow SELECT, SHOW, DESCRIBE, and also DELETE/UPDATE/INSERT for admin
-    const isReadOnly = trimmed.startsWith('SELECT') || trimmed.startsWith('SHOW') || trimmed.startsWith('DESCRIBE') || trimmed.startsWith('DESC');
-    const isWrite = trimmed.startsWith('DELETE') || trimmed.startsWith('UPDATE') || trimmed.startsWith('INSERT');
-
-    if (!isReadOnly && !isWrite) {
-      res.status(400).json({ success: false, message: 'อนุญาตเฉพาะ SELECT, SHOW, DESCRIBE, INSERT, UPDATE, DELETE เท่านั้น' });
+    if (statements.length === 0) {
+      res.status(400).json({ success: false, message: 'ไม่พบ SQL statement ที่ถูกต้อง' });
       return;
     }
 
-    const [rows] = await pool.query(sql);
+    const ALLOWED_PREFIXES = ['SELECT', 'SHOW', 'DESCRIBE', 'DESC', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'ALTER', 'DROP', 'TRUNCATE', 'SET'];
 
-    if (isReadOnly) {
-      res.json({ success: true, data: rows });
-    } else {
-      const result = rows as ResultSetHeader;
-      res.json({ success: true, message: `สำเร็จ (affected: ${result.affectedRows})`, data: [] });
+    // Validate all statements first
+    for (const stmt of statements) {
+      const upper = stmt.toUpperCase();
+      const isAllowed = ALLOWED_PREFIXES.some(p => upper.startsWith(p));
+      if (!isAllowed) {
+        res.status(400).json({ success: false, message: `คำสั่งไม่อนุญาต: ${stmt.substring(0, 50)}...` });
+        return;
+      }
     }
+
+    // Execute single statement
+    if (statements.length === 1) {
+      const stmt = statements[0];
+      const upper = stmt.toUpperCase();
+      const isReadOnly = upper.startsWith('SELECT') || upper.startsWith('SHOW') || upper.startsWith('DESCRIBE') || upper.startsWith('DESC');
+
+      const [rows] = await pool.query(stmt);
+
+      if (isReadOnly) {
+        res.json({ success: true, data: rows });
+      } else {
+        const result = rows as ResultSetHeader;
+        res.json({ success: true, message: `สำเร็จ (affected: ${result.affectedRows})`, data: [] });
+      }
+      return;
+    }
+
+    // Execute multiple statements
+    let totalAffected = 0;
+    let successCount = 0;
+    let lastSelectResult: any = null;
+
+    for (const stmt of statements) {
+      const upper = stmt.toUpperCase();
+      const isReadOnly = upper.startsWith('SELECT') || upper.startsWith('SHOW') || upper.startsWith('DESCRIBE') || upper.startsWith('DESC');
+
+      const [rows] = await pool.query(stmt);
+
+      if (isReadOnly) {
+        lastSelectResult = rows;
+      } else {
+        const result = rows as ResultSetHeader;
+        totalAffected += result.affectedRows || 0;
+      }
+      successCount++;
+    }
+
+    res.json({
+      success: true,
+      message: `สำเร็จ ${successCount}/${statements.length} คำสั่ง (affected rows: ${totalAffected})`,
+      data: lastSelectResult || [],
+    });
   } catch (error) {
     console.error('executeQuery error:', error);
     res.status(500).json({ success: false, message: (error as Error).message || 'SQL Error' });
