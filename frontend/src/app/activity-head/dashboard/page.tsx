@@ -16,6 +16,12 @@ export default function ActivityHeadDashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [reports, setReports] = useState<ProblemReport[]>([]);
 
+  // Registrants modal state
+  const [showRegistrantsModal, setShowRegistrantsModal] = useState(false);
+  const [registrantsActivity, setRegistrantsActivity] = useState<Activity | null>(null);
+  const [registrants, setRegistrants] = useState<any[]>([]);
+  const [loadingRegistrants, setLoadingRegistrants] = useState(false);
+
   React.useEffect(() => { document.title = 'ระบบลงทะเบียน – แดชบอร์ดหัวหน้ากิจกรรม'; }, []);
 
   useEffect(() => {
@@ -46,6 +52,25 @@ export default function ActivityHeadDashboardPage() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleViewRegistrants = async (activity: Activity) => {
+    setRegistrantsActivity(activity);
+    setShowRegistrantsModal(true);
+    setLoadingRegistrants(true);
+    try {
+      const res = await activitiesAPI.getRegistrations(activity.Activity_ID);
+      if (res.success && res.data) {
+        setRegistrants(res.data);
+      } else {
+        setRegistrants([]);
+      }
+    } catch (e) {
+      console.error(e);
+      setRegistrants([]);
+    } finally {
+      setLoadingRegistrants(false);
     }
   };
 
@@ -373,9 +398,9 @@ export default function ActivityHeadDashboardPage() {
                               <Link href="/activity-head/activities" className="text-blue-600 hover:text-blue-800 font-medium">
                                 แก้ไข
                               </Link>
-                              <Link href={`/activity-head/students`} className="text-green-600 hover:text-green-800 font-medium">
+                              <button onClick={() => handleViewRegistrants(activity)} className="text-purple-600 hover:text-purple-800 font-medium">
                                 ดูรายชื่อ
-                              </Link>
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -407,6 +432,62 @@ export default function ActivityHeadDashboardPage() {
           </>
         )}
       </main>
+
+      {/* ===== Registrants Modal ===== */}
+      {showRegistrantsModal && registrantsActivity && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800">รายชื่อผู้ลงทะเบียน</h3>
+                <button onClick={() => setShowRegistrantsModal(false)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">กิจกรรม: <strong>{registrantsActivity.Activity_Name}</strong></p>
+              {loadingRegistrants ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#2B4C8C]"></div>
+                  <p className="mt-2 text-gray-500">กำลังโหลด...</p>
+                </div>
+              ) : registrants.length === 0 ? (
+                <p className="text-center text-gray-500 py-8">ยังไม่มีผู้ลงทะเบียน</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">#</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">รหัสนักศึกษา</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">ชื่อ-นามสกุล</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium text-gray-500">สถานะเข้าร่วม</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {registrants.map((s: any, i: number) => (
+                        <tr key={s.Student_ID} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 text-gray-600">{i + 1}</td>
+                          <td className="px-3 py-2 text-gray-800">{s.Student_ID}</td>
+                          <td className="px-3 py-2 text-gray-800">{s.Student_Name || '-'}</td>
+                          <td className="px-3 py-2 text-center">
+                            {s.Has_CheckedIn ? (
+                              <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">เช็คอินแล้ว</span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">ยังไม่เช็คอิน</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="mt-3 text-sm text-gray-500">รวม {registrants.length} คน | เช็คอินแล้ว {registrants.filter((s: any) => s.Has_CheckedIn).length} คน</p>
+                </div>
+              )}
+              <div className="flex justify-end mt-4 pt-4 border-t">
+                <button onClick={() => setShowRegistrantsModal(false)} className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">ปิด</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

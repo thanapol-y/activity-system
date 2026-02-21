@@ -81,9 +81,10 @@ export default function ActivityHeadReportsPage() {
         ? activities
         : activities.filter(a => a.Activity_ID === selectedExport);
 
-      const allRows: string[][] = [];
+      const lines: string[] = [];
 
-      for (const a of toExport) {
+      for (let ai = 0; ai < toExport.length; ai++) {
+        const a = toExport[ai];
         let students: any[] = [];
         try {
           const regRes = await activitiesAPI.getRegistrations(a.Activity_ID);
@@ -93,63 +94,58 @@ export default function ActivityHeadReportsPage() {
         } catch { /* ignore */ }
 
         const statusTh = a.Activity_Status === 'approved' ? 'อนุมัติ' : a.Activity_Status === 'pending' ? 'รออนุมัติ' : 'ไม่อนุมัติ';
-        const creator = a.Activity_Head_Name || '-';
+        const checkedInCount = students.filter((s: any) => s.Has_CheckedIn).length;
+
+        // Section separator between activities
+        if (ai > 0) {
+          lines.push('');
+          lines.push(',,,,');
+        }
+
+        // Activity info header section
+        lines.push(`ข้อมูลกิจกรรม`);
+        lines.push(`รหัสกิจกรรม,${escapeCSV(a.Activity_ID)}`);
+        lines.push(`ชื่อกิจกรรม,${escapeCSV(a.Activity_Name)}`);
+        lines.push(`ประเภท,${escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || 'ทั่วไป')}`);
+        lines.push(`วันที่จัด,${escapeCSV(formatThaiDate(a.Activity_Date))}`);
+        lines.push(`เวลา,${a.Activity_Time ? a.Activity_Time.substring(0, 5) + ' น.' : '-'}`);
+        lines.push(`สถานที่,${escapeCSV(a.Activity_Location || '-')}`);
+        lines.push(`จำนวนชั่วโมง,${a.Activity_Hours || 3}`);
+        lines.push(`ปีการศึกษา,${a.Academic_Year}`);
+        lines.push(`สถานะ,${statusTh}`);
+        lines.push(`ผู้สร้างกิจกรรม,${escapeCSV(a.Activity_Head_Name || '-')}`);
+        lines.push(`จำนวนผู้ลงทะเบียน,${students.length} / ${a.Maximum_Capacity} คน`);
+        lines.push(`เข้าร่วมแล้ว,${checkedInCount} คน`);
+        if (a.Activity_Details) {
+          lines.push(`รายละเอียด,${escapeCSV(a.Activity_Details)}`);
+        }
+
+        // Blank row before participant table
+        lines.push('');
+
+        // Participant table header
+        lines.push('รายชื่อผู้เข้าร่วมกิจกรรม');
+        lines.push(['ลำดับ', 'รหัสนักศึกษา', 'ชื่อ-นามสกุล', 'คณะ', 'สาขา', 'สถานะเข้าร่วม', 'เวลาเช็คอิน'].join(','));
 
         if (students.length > 0) {
           students.forEach((s: any, idx: number) => {
-            allRows.push([
-              a.Activity_ID,
-              escapeCSV(a.Activity_Name),
-              escapeCSV(a.Activity_Details || ''),
-              formatThaiDate(a.Activity_Date),
-              a.Activity_Time ? a.Activity_Time.substring(0, 5) : '',
-              escapeCSV(a.Activity_Location || ''),
-              escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || ''),
-              String(a.Activity_Hours || 3),
-              String(a.Maximum_Capacity),
-              String(a.Current_Registrations || 0),
-              statusTh,
-              String(a.Academic_Year),
+            lines.push([
               String(idx + 1),
               s.Student_ID || '',
-              escapeCSV(s.Student_Name || ''),
-              escapeCSV(s.Student_Email || ''),
-              escapeCSV(s.Faculty_Name || ''),
-              escapeCSV(s.Branch_Name || ''),
+              escapeCSV(s.Student_Name || '-'),
+              escapeCSV(s.Faculty_Name || '-'),
+              escapeCSV(s.Branch_Name || '-'),
               s.Has_CheckedIn ? 'เข้าร่วมแล้ว' : 'ยังไม่ได้เข้าร่วม',
               s.CheckIn_Time ? new Date(s.CheckIn_Time).toLocaleString('th-TH') : '-',
-              escapeCSV(creator),
-            ]);
+            ].join(','));
           });
         } else {
-          allRows.push([
-            a.Activity_ID,
-            escapeCSV(a.Activity_Name),
-            escapeCSV(a.Activity_Details || ''),
-            formatThaiDate(a.Activity_Date),
-            a.Activity_Time ? a.Activity_Time.substring(0, 5) : '',
-            escapeCSV(a.Activity_Location || ''),
-            escapeCSV(a.Activity_Type_Name || a.Activity_Type_ID || ''),
-            String(a.Activity_Hours || 3),
-            String(a.Maximum_Capacity),
-            '0',
-            statusTh,
-            String(a.Academic_Year),
-            '', '', '', '', '', '', 'ไม่มีผู้ลงทะเบียน', '',
-            escapeCSV(creator),
-          ]);
+          lines.push(',,ไม่มีผู้ลงทะเบียน,,,,');
         }
       }
 
-      const headers = [
-        'รหัสกิจกรรม', 'ชื่อกิจกรรม', 'รายละเอียด', 'วันที่จัด', 'เวลา', 'สถานที่', 'ประเภท', 'ชั่วโมง',
-        'ความจุสูงสุด', 'สมัครแล้ว', 'สถานะ', 'ปีการศึกษา',
-        'ลำดับ', 'รหัสนักศึกษา', 'ชื่อนักศึกษา', 'อีเมล', 'คณะ', 'สาขา', 'สถานะเข้าร่วม', 'เวลาเช็คอิน',
-        'ผู้สร้าง',
-      ];
-
       const BOM = '\uFEFF';
-      const csvContent = BOM + [headers.join(','), ...allRows.map(r => r.join(','))].join('\n');
+      const csvContent = BOM + lines.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');

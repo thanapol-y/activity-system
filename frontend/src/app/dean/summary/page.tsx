@@ -12,6 +12,8 @@ export default function DeanSummaryPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [yearA, setYearA] = useState<number>(0);
+  const [yearB, setYearB] = useState<number>(0);
 
   React.useEffect(() => { document.title = 'ระบบลงทะเบียน – สรุปภาพรวมกิจกรรม'; }, []);
 
@@ -23,7 +25,17 @@ export default function DeanSummaryPage() {
         activitiesAPI.getAll({ limit: 100 }),
       ]);
       if (statsRes.success && statsRes.data) setStats(statsRes.data);
-      if (activitiesRes.success && activitiesRes.data) setActivities(activitiesRes.data);
+      if (activitiesRes.success && activitiesRes.data) {
+        setActivities(activitiesRes.data);
+        const years = Array.from(new Set(activitiesRes.data.map((a: Activity) => a.Academic_Year))).sort((a: number, b: number) => b - a);
+        if (years.length >= 2) {
+          setYearA(years[0]);
+          setYearB(years[1]);
+        } else if (years.length === 1) {
+          setYearA(years[0]);
+          setYearB(years[0]);
+        }
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -37,49 +49,58 @@ export default function DeanSummaryPage() {
 
   if (!user) return null;
 
+  const availableYears = Array.from(new Set(activities.map(a => a.Academic_Year))).sort((a, b) => b - a);
+
+  // Helper: compute stats for a given year
+  const computeYearStats = (year: number) => {
+    const filtered = activities.filter(a => a.Academic_Year === year);
+    const total = filtered.length;
+    const approved = filtered.filter(a => a.Activity_Status === 'approved').length;
+    const pending = filtered.filter(a => a.Activity_Status === 'pending').length;
+    const rejected = filtered.filter(a => a.Activity_Status === 'rejected').length;
+    const regs = filtered.reduce((s, a) => s + (a.Current_Registrations || 0), 0);
+    const capacity = filtered.reduce((s, a) => s + (a.Maximum_Capacity || 0), 0);
+    const hours = filtered.reduce((s, a) => s + (a.Activity_Hours || 3), 0);
+    const fillRate = capacity > 0 ? Math.round((regs / capacity) * 100) : 0;
+    // Type breakdown
+    const typeMap = new Map<string, { name: string; count: number; regs: number }>();
+    filtered.forEach(a => {
+      const typeName = a.Activity_Type_Name || 'ทั่วไป';
+      const existing = typeMap.get(typeName) || { name: typeName, count: 0, regs: 0 };
+      existing.count++;
+      existing.regs += a.Current_Registrations || 0;
+      typeMap.set(typeName, existing);
+    });
+    const types = Array.from(typeMap.values()).sort((a, b) => b.count - a.count);
+    return { total, approved, pending, rejected, regs, capacity, hours, fillRate, types };
+  };
+
+  const statsA = computeYearStats(yearA);
+  const statsB = computeYearStats(yearB);
+
+  // Change indicator
+  const changeIcon = (a: number, b: number) => {
+    if (a > b) return <span className="text-green-500 text-xs font-bold ml-1">▲ +{a - b}</span>;
+    if (a < b) return <span className="text-red-500 text-xs font-bold ml-1">▼ {a - b}</span>;
+    return <span className="text-gray-400 text-xs ml-1">—</span>;
+  };
+
+  const changePct = (a: number, b: number) => {
+    if (b === 0) return a > 0 ? '+100%' : '—';
+    const pct = Math.round(((a - b) / b) * 100);
+    if (pct > 0) return `+${pct}%`;
+    if (pct < 0) return `${pct}%`;
+    return '—';
+  };
+
+  // All types across both years for comparison
+  const allTypeNames = Array.from(new Set([...statsA.types.map(t => t.name), ...statsB.types.map(t => t.name)]));
+
+  // Overall stats (all years) for bottom section
   const totalActivities = stats?.summary.totalActivities || 0;
   const totalRegistrations = stats?.summary.totalRegistrations || 0;
   const totalCheckIns = stats?.summary.totalCheckIns || 0;
   const attendanceRate = totalRegistrations > 0 ? Math.round((totalCheckIns / totalRegistrations) * 100) : 0;
-  const notAttended = totalRegistrations - totalCheckIns;
-
-  const activityByStatus = stats?.activitiesByStatus || [];
-  const topActivities = stats?.topActivities || [];
-
-  const approvedCount = activityByStatus.find(s => s.Activity_Status === 'approved')?.count || 0;
-  const pendingCount = activityByStatus.find(s => s.Activity_Status === 'pending')?.count || 0;
-  const rejectedCount = activityByStatus.find(s => s.Activity_Status === 'rejected')?.count || 0;
-
-  const totalHours = activities.reduce((sum, a) => sum + (a.Activity_Hours || 3), 0);
-  const totalCapacity = activities.reduce((sum, a) => sum + (a.Maximum_Capacity || 0), 0);
-  const totalRegsFromActivities = activities.reduce((sum, a) => sum + (a.Current_Registrations || 0), 0);
-  const avgFillRate = totalCapacity > 0 ? Math.round((totalRegsFromActivities / totalCapacity) * 100) : 0;
-
-  const upcomingActivities = activities.filter(a => new Date(a.Activity_Date) >= new Date()).sort((a, b) => new Date(a.Activity_Date).getTime() - new Date(b.Activity_Date).getTime());
-
-  const activityTypeMap = new Map<string, { name: string; count: number; regs: number; hours: number }>();
-  activities.forEach(a => {
-    const typeName = a.Activity_Type_Name || 'ทั่วไป';
-    const existing = activityTypeMap.get(typeName) || { name: typeName, count: 0, regs: 0, hours: 0 };
-    existing.count++;
-    existing.regs += a.Current_Registrations || 0;
-    existing.hours += a.Activity_Hours || 3;
-    activityTypeMap.set(typeName, existing);
-  });
-  const activityTypeStats = Array.from(activityTypeMap.values()).sort((a, b) => b.count - a.count);
-
-  const statusColors: Record<string, { bar: string }> = {
-    approved: { bar: 'bg-green-500' },
-    pending: { bar: 'bg-yellow-500' },
-    rejected: { bar: 'bg-red-500' },
-  };
-  const statusLabels: Record<string, string> = {
-    approved: 'อนุมัติแล้ว',
-    pending: 'รอดำเนินการ',
-    rejected: 'ปฏิเสธ',
-  };
-
-  const maxStatusCount = activityByStatus.length > 0 ? Math.max(...activityByStatus.map((s: { Activity_Status: string; count: number }) => s.count)) : 1;
 
   const formatDate = (d?: string) => {
     if (!d) return '-';
@@ -106,7 +127,7 @@ export default function DeanSummaryPage() {
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">สรุปภาพรวมกิจกรรม</h1>
-          <p className="text-sm md:text-base text-gray-600">ข้อมูลเชิงลึกและสถิติทั้งหมดของระบบกิจกรรม</p>
+          <p className="text-sm md:text-base text-gray-600">เปรียบเทียบข้อมูลระหว่างปีการศึกษาและดูสถิติเชิงลึก</p>
         </div>
 
         {loading ? (
@@ -116,164 +137,119 @@ export default function DeanSummaryPage() {
           </div>
         ) : (
           <>
-            {/* KPI Row 1: Key Numbers */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-blue-500">
-                <p className="text-xs text-gray-500 mb-1">กิจกรรมทั้งหมด</p>
-                <p className="text-2xl font-bold text-gray-800">{totalActivities}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-green-500">
-                <p className="text-xs text-gray-500 mb-1">อนุมัติแล้ว</p>
-                <p className="text-2xl font-bold text-green-600">{approvedCount}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-yellow-500">
-                <p className="text-xs text-gray-500 mb-1">รออนุมัติ</p>
-                <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-sm p-4 text-center border-l-4 border-red-500">
-                <p className="text-xs text-gray-500 mb-1">ไม่อนุมัติ</p>
-                <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
-              </div>
-            </div>
-
-            {/* KPI Row 2: Participation */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-[#2B4C8C] to-[#3B5998] rounded-lg shadow-md p-5 text-white">
-                <p className="text-sm opacity-80 mb-1">ลงทะเบียนทั้งหมด</p>
-                <p className="text-3xl font-bold">{totalRegistrations.toLocaleString()}</p>
-                <p className="text-xs opacity-70 mt-1">คนลงทะเบียนรวมทุกกิจกรรม</p>
-              </div>
-              <div className="bg-gradient-to-br from-green-600 to-green-500 rounded-lg shadow-md p-5 text-white">
-                <p className="text-sm opacity-80 mb-1">เช็คอินแล้ว</p>
-                <p className="text-3xl font-bold">{totalCheckIns.toLocaleString()}</p>
-                <p className="text-xs opacity-70 mt-1">เข้าร่วมจริง ({attendanceRate}%)</p>
-              </div>
-              <div className="bg-gradient-to-br from-orange-500 to-orange-400 rounded-lg shadow-md p-5 text-white">
-                <p className="text-sm opacity-80 mb-1">ยังไม่เช็คอิน</p>
-                <p className="text-3xl font-bold">{notAttended.toLocaleString()}</p>
-                <p className="text-xs opacity-70 mt-1">ลงทะเบียนแต่ไม่มา</p>
-              </div>
-              <div className="bg-gradient-to-br from-purple-600 to-purple-500 rounded-lg shadow-md p-5 text-white">
-                <p className="text-sm opacity-80 mb-1">อัตราเต็มเฉลี่ย</p>
-                <p className="text-3xl font-bold">{avgFillRate}%</p>
-                <p className="text-xs opacity-70 mt-1">ลงทะเบียน/ที่นั่งทั้งหมด</p>
+            {/* Year Comparison Selectors */}
+            <div className="bg-white rounded-xl shadow-md p-5 mb-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">เปรียบเทียบปีการศึกษา</h3>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-[#2B4C8C] rounded-full"></div>
+                  <label className="text-sm text-gray-600">ปีที่ 1:</label>
+                  <select value={yearA} onChange={(e) => setYearA(Number(e.target.value))} className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white">
+                    {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <span className="text-gray-400 text-lg font-bold">VS</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <label className="text-sm text-gray-600">ปีที่ 2:</label>
+                  <select value={yearB} onChange={(e) => setYearB(Number(e.target.value))} className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#2B4C8C] focus:border-transparent outline-none text-gray-900 bg-white">
+                    {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
               </div>
             </div>
 
-            {/* Charts Row */}
+            {/* Side-by-Side Comparison */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Activity by Status */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-6">กิจกรรมแยกตามสถานะ</h3>
-                {activityByStatus.length > 0 ? (
-                  <div className="space-y-4">
-                    {activityByStatus.map((item: { Activity_Status: string; count: number }) => (
-                      <div key={item.Activity_Status}>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-gray-600">{statusLabels[item.Activity_Status] || item.Activity_Status}</span>
-                          <span className="text-sm font-semibold text-gray-800">{item.count}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div
-                            className={`${statusColors[item.Activity_Status]?.bar || 'bg-gray-500'} h-3 rounded-full transition-all`}
-                            style={{ width: `${Math.round((item.count / maxStatusCount) * 100)}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+              {/* Year A */}
+              <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-[#2B4C8C]">
+                <h3 className="text-lg font-bold text-[#2B4C8C] mb-4">ปีการศึกษา {yearA}</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-blue-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">กิจกรรม</p>
+                    <p className="text-2xl font-bold text-gray-800">{statsA.total}</p>
                   </div>
-                ) : (
-                  <p className="text-center text-gray-400 py-8">ไม่มีข้อมูล</p>
-                )}
+                  <div className="bg-green-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">ผู้ลงทะเบียน</p>
+                    <p className="text-2xl font-bold text-green-700">{statsA.regs.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">ชั่วโมงรวม</p>
+                    <p className="text-2xl font-bold text-purple-700">{statsA.hours}</p>
+                  </div>
+                  <div className="bg-orange-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">อัตราเต็ม</p>
+                    <p className="text-2xl font-bold text-orange-700">{statsA.fillRate}%</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2 text-xs">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">อนุมัติ {statsA.approved}</span>
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full">รอ {statsA.pending}</span>
+                  <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full">ไม่อนุมัติ {statsA.rejected}</span>
+                </div>
               </div>
 
-              {/* Participation Rate - Donut */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-6">อัตราการเข้าร่วมจริง</h3>
-                <div className="flex items-center justify-center py-4">
-                  <div className="text-center">
-                    <div className="relative inline-flex items-center justify-center">
-                      <svg className="w-40 h-40">
-                        <circle cx="80" cy="80" r="60" fill="none" stroke="#e5e7eb" strokeWidth="20" />
-                        <circle
-                          cx="80" cy="80" r="60" fill="none" stroke="#2B4C8C" strokeWidth="20"
-                          strokeDasharray={`${2 * Math.PI * 60 * (attendanceRate / 100)} ${2 * Math.PI * 60}`}
-                          strokeDashoffset={2 * Math.PI * 60 * 0.25}
-                          transform="rotate(-90 80 80)"
-                        />
-                      </svg>
-                      <div className="absolute text-center">
-                        <div className="text-3xl font-bold text-gray-800">{attendanceRate}%</div>
-                        <div className="text-sm text-gray-600">เข้าร่วม</div>
-                      </div>
-                    </div>
-                    <div className="mt-6 space-y-2">
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="w-3 h-3 bg-[#2B4C8C] rounded-full"></div>
-                        <span className="text-sm text-gray-600">เช็คอินแล้ว: {totalCheckIns.toLocaleString()} คน</span>
-                      </div>
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                        <span className="text-sm text-gray-600">ยังไม่เช็คอิน: {notAttended.toLocaleString()} คน</span>
-                      </div>
-                    </div>
+              {/* Year B */}
+              <div className="bg-white rounded-xl shadow-md p-6 border-t-4 border-orange-500">
+                <h3 className="text-lg font-bold text-orange-600 mb-4">ปีการศึกษา {yearB}</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-blue-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">กิจกรรม</p>
+                    <p className="text-2xl font-bold text-gray-800">{statsB.total}</p>
                   </div>
+                  <div className="bg-green-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">ผู้ลงทะเบียน</p>
+                    <p className="text-2xl font-bold text-green-700">{statsB.regs.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">ชั่วโมงรวม</p>
+                    <p className="text-2xl font-bold text-purple-700">{statsB.hours}</p>
+                  </div>
+                  <div className="bg-orange-50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-gray-500">อัตราเต็ม</p>
+                    <p className="text-2xl font-bold text-orange-700">{statsB.fillRate}%</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2 text-xs">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full">อนุมัติ {statsB.approved}</span>
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full">รอ {statsB.pending}</span>
+                  <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full">ไม่อนุมัติ {statsB.rejected}</span>
                 </div>
               </div>
             </div>
 
-            {/* Activity Type Breakdown */}
-            {activityTypeStats.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">สรุปแยกตามประเภทกิจกรรม</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {activityTypeStats.map((t) => (
-                    <div key={t.name} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                      <h4 className="font-semibold text-gray-800 text-sm mb-2">{t.name}</h4>
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div>
-                          <p className="text-gray-500">กิจกรรม</p>
-                          <p className="text-lg font-bold text-[#2B4C8C]">{t.count}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">ผู้ลงทะเบียน</p>
-                          <p className="text-lg font-bold text-green-600">{t.regs}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500">ชม.รวม</p>
-                          <p className="text-lg font-bold text-purple-600">{t.hours}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Top Activities Table */}
-            {topActivities.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">กิจกรรมยอดนิยม</h3>
+            {/* Comparison Table */}
+            {yearA !== yearB && (
+              <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">เปรียบเทียบ ปี {yearA} vs ปี {yearB}</h3>
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อกิจกรรม</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">ผู้ลงทะเบียน</th>
-                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">อัตราเต็ม</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ตัวชี้วัด</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-[#2B4C8C] uppercase">ปี {yearA}</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-orange-600 uppercase">ปี {yearB}</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">เปลี่ยนแปลง</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {topActivities.slice(0, 5).map((act, i) => (
-                        <tr key={act.Activity_ID} className="hover:bg-gray-50">
-                          <td className="px-4 py-4 text-sm font-bold text-gray-800">{i + 1}</td>
-                          <td className="px-4 py-4 text-sm font-medium text-gray-900">{act.Activity_Name}</td>
-                          <td className="px-4 py-4 text-sm text-gray-600">{formatDate(act.Activity_Date)}</td>
-                          <td className="px-4 py-4 text-sm text-center font-semibold text-[#2B4C8C]">{act.registration_count}</td>
-                          <td className="px-4 py-4 text-sm text-center text-gray-600">
-                            {act.registration_count}/{act.Maximum_Capacity}
+                    <tbody className="divide-y divide-gray-100">
+                      {[
+                        { label: 'จำนวนกิจกรรม', a: statsA.total, b: statsB.total },
+                        { label: 'ผู้ลงทะเบียนรวม', a: statsA.regs, b: statsB.regs },
+                        { label: 'ชั่วโมงกิจกรรมรวม', a: statsA.hours, b: statsB.hours },
+                        { label: 'ที่นั่งรวม', a: statsA.capacity, b: statsB.capacity },
+                        { label: 'อัตราเต็ม (%)', a: statsA.fillRate, b: statsB.fillRate },
+                        { label: 'อนุมัติแล้ว', a: statsA.approved, b: statsB.approved },
+                        { label: 'รออนุมัติ', a: statsA.pending, b: statsB.pending },
+                        { label: 'ไม่อนุมัติ', a: statsA.rejected, b: statsB.rejected },
+                      ].map((row) => (
+                        <tr key={row.label} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-700">{row.label}</td>
+                          <td className="px-4 py-3 text-center font-semibold text-gray-800">{row.a.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-center font-semibold text-gray-800">{row.b.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-center">
+                            {changeIcon(row.a, row.b)}
+                            <span className="text-xs text-gray-400 ml-1">({changePct(row.a, row.b)})</span>
                           </td>
                         </tr>
                       ))}
@@ -283,60 +259,83 @@ export default function DeanSummaryPage() {
               </div>
             )}
 
-            {/* Upcoming Activities */}
-            {upcomingActivities.length > 0 && (
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">กิจกรรมที่กำลังจะจัด ({upcomingActivities.length})</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                  {upcomingActivities.map((act) => {
-                    const regCount = act.Current_Registrations || 0;
-                    const fillPct = act.Maximum_Capacity > 0 ? Math.round((regCount / act.Maximum_Capacity) * 100) : 0;
-                    const fillColor = fillPct >= 90 ? 'bg-red-500' : fillPct >= 60 ? 'bg-yellow-500' : 'bg-green-500';
-                    return (
-                      <div key={act.Activity_ID} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 text-sm">{act.Activity_Name}</h4>
-                            <p className="text-xs text-gray-500">{act.Activity_Type_Name || 'ทั่วไป'} · {act.Activity_Head_Name || '-'}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="bg-[#2B4C8C] text-white text-xs font-bold px-2 py-1 rounded-full">{act.Activity_Hours || 3} ชม.</div>
-                            {getStatusBadge(act.Activity_Status)}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 text-xs mb-2">
-                          <div className="text-gray-500">📅 {formatDate(act.Activity_Date)}</div>
-                          <div className="text-gray-500">🕐 {act.Activity_Time ? act.Activity_Time.substring(0, 5) + ' น.' : '-'}</div>
-                          <div className="text-gray-500 truncate">📍 {act.Activity_Location || '-'}</div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2">
-                            <div className={`${fillColor} h-2 rounded-full`} style={{ width: `${fillPct}%` }}></div>
-                          </div>
-                          <span className="text-xs font-semibold text-gray-600">{regCount}/{act.Maximum_Capacity} ({fillPct}%)</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+            {/* Type Comparison */}
+            {yearA !== yearB && allTypeNames.length > 0 && (
+              <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">เปรียบเทียบแยกตามประเภทกิจกรรม</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ประเภท</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-[#2B4C8C] uppercase" colSpan={2}>ปี {yearA}</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-orange-600 uppercase" colSpan={2}>ปี {yearB}</th>
+                      </tr>
+                      <tr>
+                        <th></th>
+                        <th className="px-2 py-1 text-center text-[10px] text-gray-400">กิจกรรม</th>
+                        <th className="px-2 py-1 text-center text-[10px] text-gray-400">คน</th>
+                        <th className="px-2 py-1 text-center text-[10px] text-gray-400">กิจกรรม</th>
+                        <th className="px-2 py-1 text-center text-[10px] text-gray-400">คน</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {allTypeNames.map(name => {
+                        const tA = statsA.types.find(t => t.name === name);
+                        const tB = statsB.types.find(t => t.name === name);
+                        return (
+                          <tr key={name} className="hover:bg-gray-50">
+                            <td className="px-4 py-2 font-medium text-gray-700">{name}</td>
+                            <td className="px-2 py-2 text-center text-gray-800 font-semibold">{tA?.count || 0}</td>
+                            <td className="px-2 py-2 text-center text-gray-600">{tA?.regs || 0}</td>
+                            <td className="px-2 py-2 text-center text-gray-800 font-semibold">{tB?.count || 0}</td>
+                            <td className="px-2 py-2 text-center text-gray-600">{tB?.regs || 0}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
 
-            {/* All Activities Overview */}
+            {/* Overall System Stats */}
+            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">สถิติรวมทั้งระบบ (ทุกปี)</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">กิจกรรมทั้งหมด</p>
+                  <p className="text-2xl font-bold text-[#2B4C8C]">{totalActivities}</p>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">ลงทะเบียนรวม</p>
+                  <p className="text-2xl font-bold text-green-700">{totalRegistrations.toLocaleString()}</p>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">เช็คอินรวม</p>
+                  <p className="text-2xl font-bold text-purple-700">{totalCheckIns.toLocaleString()}</p>
+                </div>
+                <div className="text-center p-3 bg-orange-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">อัตราเข้าร่วม</p>
+                  <p className="text-2xl font-bold text-orange-700">{attendanceRate}%</p>
+                </div>
+              </div>
+            </div>
+
+            {/* All Activities Table */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">กิจกรรมทั้งหมด ({activities.length})</h3>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อกิจกรรม</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">ประเภท</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่</th>
+                      <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ปี</th>
                       <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ชม.</th>
                       <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ลงทะเบียน</th>
-                      <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ความจุ</th>
                       <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">%เต็ม</th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">หัวหน้า</th>
                       <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th>
                     </tr>
                   </thead>
@@ -346,16 +345,15 @@ export default function DeanSummaryPage() {
                       const fillPct = act.Maximum_Capacity > 0 ? Math.round((regCount / act.Maximum_Capacity) * 100) : 0;
                       return (
                         <tr key={act.Activity_ID} className="hover:bg-gray-50">
-                          <td className="px-3 py-3 text-sm font-medium text-gray-900">{act.Activity_Name}</td>
+                          <td className="px-3 py-3 font-medium text-gray-900">{act.Activity_Name}</td>
                           <td className="px-3 py-3 text-xs text-gray-500">{act.Activity_Type_Name || 'ทั่วไป'}</td>
                           <td className="px-3 py-3 text-xs text-gray-600 whitespace-nowrap">{formatDate(act.Activity_Date)}</td>
-                          <td className="px-3 py-3 text-sm text-center font-bold text-[#2B4C8C]">{act.Activity_Hours || 3}</td>
-                          <td className="px-3 py-3 text-sm text-center font-semibold">{regCount}</td>
-                          <td className="px-3 py-3 text-sm text-center text-gray-600">{act.Maximum_Capacity}</td>
-                          <td className="px-3 py-3 text-sm text-center">
+                          <td className="px-3 py-3 text-xs text-center text-gray-600">{act.Academic_Year}</td>
+                          <td className="px-3 py-3 text-center font-bold text-[#2B4C8C]">{act.Activity_Hours || 3}</td>
+                          <td className="px-3 py-3 text-center font-semibold">{regCount}/{act.Maximum_Capacity}</td>
+                          <td className="px-3 py-3 text-center">
                             <span className={`font-semibold ${fillPct >= 90 ? 'text-red-600' : fillPct >= 60 ? 'text-yellow-600' : 'text-green-600'}`}>{fillPct}%</span>
                           </td>
-                          <td className="px-3 py-3 text-xs text-gray-600">{act.Activity_Head_Name || '-'}</td>
                           <td className="px-3 py-3">{getStatusBadge(act.Activity_Status)}</td>
                         </tr>
                       );
