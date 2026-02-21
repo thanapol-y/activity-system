@@ -113,7 +113,7 @@ export default function StudentProfilePage() {
               </svg>
               <div>
                 <p className="text-sm font-medium text-yellow-800">ข้อมูลแก้ไขโดยผู้ดูแลระบบเท่านั้น</p>
-                <p className="text-xs text-yellow-700 mt-1">หากต้องการเปลี่ยนแปลงข้อมูลหรือรีเซ็ตรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ (Admin)</p>
+                <p className="text-xs text-yellow-700 mt-1">หากต้องการเปลี่ยนแปลงข้อมูลหรือรีเซ็ตรหัสผ่าน กรุณาติดต่อเจ้าหน้าที่งานสโมสรและกิจกรรมนักศึกษา</p>
               </div>
             </div>
           </div>
