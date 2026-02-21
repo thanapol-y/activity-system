@@ -20,6 +20,7 @@ const quickAccounts = [
   { role: UserRole.ACTIVITY_HEAD, userId: 'head003', password: 'password', label: 'หัวหน้ากิจกรรม - อาจารย์ศราวุธ แดงมาก' },
   { role: UserRole.DEAN, userId: 'dean001', password: 'password', label: 'รองคณบดี - ดร.ศรีสุดา อินทมาศ' },
   { role: UserRole.ADMIN, userId: 'admin001', password: 'password', label: 'ผู้ดูแลระบบ' },
+  { role: UserRole.ADMIN, userId: 'admin001', password: 'password', label: 'ผู้ดูแลระบบ - จัดการฐานข้อมูล', redirect: '/admin/database' },
 ];
 
 export default function LoginPage() {
@@ -98,6 +99,9 @@ export default function LoginPage() {
     setShowQuickLogin(false);
     try {
       await login(account.userId, account.password, account.role);
+      if (account.redirect) {
+        setTimeout(() => { window.location.href = account.redirect!; }, 100);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เข้าสู่ระบบไม่สำเร็จ');
     }

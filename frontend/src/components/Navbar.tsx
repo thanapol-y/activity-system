@@ -26,6 +26,7 @@ export default function Navbar() {
         return [
           { label: 'หน้าหลัก', href: '/admin/dashboard' },
           { label: 'จัดการผู้ใช้', href: '/admin/users' },
+          { label: 'จัดการฐานข้อมูล', href: '/admin/database' },
         ];
       case UserRole.DEAN:
         return [

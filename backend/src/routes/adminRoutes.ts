@@ -9,6 +9,13 @@ import {
   resetPassword,
   getDashboardStats,
 } from '../controllers/adminController';
+import {
+  getTables,
+  getTableData,
+  updateRow,
+  deleteRow,
+  executeQuery,
+} from '../controllers/databaseController';
 
 const router = express.Router();
 
@@ -25,5 +32,12 @@ router.post('/users/:role', createUser);
 router.put('/users/:role/:id', updateUser);
 router.delete('/users/:role/:id', deleteUser);
 router.put('/users/:role/:id/reset-password', resetPassword);
+
+// Database management
+router.get('/database/tables', getTables);
+router.get('/database/tables/:table', getTableData);
+router.put('/database/tables/:table', updateRow);
+router.delete('/database/tables/:table', deleteRow);
+router.post('/database/query', executeQuery);
 
 export default router;

@@ -414,6 +414,43 @@ export const reportsAPI = {
   },
 };
 
+// Database Management API (Admin)
+export const databaseAPI = {
+  getTables: async (): Promise<ApiResponse<any>> => {
+    return apiRequest<ApiResponse<any>>("/admin/database/tables");
+  },
+
+  getTableData: async (table: string, search?: string, page?: number, limit?: number): Promise<ApiResponse<any>> => {
+    const params = new URLSearchParams();
+    if (search) params.append("search", search);
+    if (page) params.append("page", page.toString());
+    if (limit) params.append("limit", limit.toString());
+    const qs = params.toString();
+    return apiRequest<ApiResponse<any>>(`/admin/database/tables/${table}${qs ? `?${qs}` : ""}`);
+  },
+
+  updateRow: async (table: string, primaryKeyValues: Record<string, any>, data: Record<string, any>): Promise<ApiResponse> => {
+    return apiRequest<ApiResponse>(`/admin/database/tables/${table}`, {
+      method: "PUT",
+      body: JSON.stringify({ primaryKeyValues, data }),
+    });
+  },
+
+  deleteRow: async (table: string, primaryKeyValues: Record<string, any>): Promise<ApiResponse> => {
+    return apiRequest<ApiResponse>(`/admin/database/tables/${table}`, {
+      method: "DELETE",
+      body: JSON.stringify({ primaryKeyValues }),
+    });
+  },
+
+  executeQuery: async (sql: string): Promise<ApiResponse<any>> => {
+    return apiRequest<ApiResponse<any>>("/admin/database/query", {
+      method: "POST",
+      body: JSON.stringify({ sql }),
+    });
+  },
+};
+
 // Export all APIs
 export default {
   auth: authAPI,
@@ -422,4 +459,5 @@ export default {
   statistics: statisticsAPI,
   admin: adminAPI,
   reports: reportsAPI,
+  database: databaseAPI,
 };
