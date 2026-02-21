@@ -297,7 +297,7 @@ export default function ActivityHeadActivitiesPage() {
             onClick={handleCreate}
             className="bg-[#28A745] hover:bg-[#218838] text-white font-medium py-2 px-6 rounded-lg transition-colors text-center whitespace-nowrap"
           >
-            + เพิ่มกิจกรรมใหม่
+            + สร้างกิจกรรมใหม่
           </button>
         </div>
 
