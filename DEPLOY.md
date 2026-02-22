@@ -24,7 +24,7 @@ git init
 git add .
 git commit -m "Initial commit - Activity Registration System"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/activity-system.git
+git remote add origin https://github.com/thanapol-y/activity-system.git
 git push -u origin main
 ```
 
@@ -36,21 +36,45 @@ git push -u origin main
 2. กด **New Project** → **Empty Project**
 3. ใน project กด **+ New** → **Database** → **MySQL**
 4. รอสักครู่ให้ MySQL พร้อม
-5. คลิกที่ MySQL service → แท็บ **Data** → กด **Query**
-6. Copy เนื้อหาจากไฟล์ `database/schema.sql` วางลงไป → กด **Run**
-7. Copy เนื้อหาจากไฟล์ `database/insert_data.sql` วางลงไป → กด **Run**
 
-> ✅ ตอนนี้ database พร้อมแล้ว
+### นำเข้าโครงสร้างและข้อมูลเข้า MySQL
+
+ใช้ **MySQL CLI จาก XAMPP** ในเครื่อง เชื่อมต่อไปยัง Railway MySQL ผ่าน **Public Endpoint**
+
+**วิธีดู connection info:**
+1. คลิกที่ MySQL service บน Railway
+2. ไปแท็บ **Variables** หรือ **Connect**
+3. จดค่า `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`
+
+**รันคำสั่งใน PowerShell:**
+
+```powershell
+# นำเข้าโครงสร้างตาราง (schema)
+& "C:\xampp\mysql\bin\mysql.exe" -h <MYSQLHOST> -u <MYSQLUSER> -p<MYSQLPASSWORD> --port <MYSQLPORT> --protocol=TCP <MYSQLDATABASE> < database\schema.sql
+
+# นำเข้าข้อมูลตัวอย่าง (insert data)
+& "C:\xampp\mysql\bin\mysql.exe" -h <MYSQLHOST> -u <MYSQLUSER> -p<MYSQLPASSWORD> --port <MYSQLPORT> --protocol=TCP <MYSQLDATABASE> < database\insert_data.sql
+```
+
+---
+
+สรุปวิธีนี้คือ:
+1. **XAMPP** ที่ติดตั้งในเครื่องมี `mysql.exe` (MySQL CLI client) อยู่แล้ว
+2. Railway MySQL มี **Public Endpoint** (host + port) ที่สามารถเชื่อมต่อจากภายนอกได้
+3. ใช้คำสั่ง `mysql.exe` + ข้อมูล connection ของ Railway → รันไฟล์ `schema.sql` และ `insert_data.sql` เข้าไปตรงๆ
+
+กด **เปลี่ยนเป็น Code mode** แล้วผมจะแก้ไขไฟล์ให้เลยครับ
+
 
 ## ขั้นที่ 4: Deploy Backend
 
 1. ใน Railway project เดิม กด **+ New** → **GitHub Repo** → เลือก `activity-system`
-2. Railway จะถามให้ตั้งค่า:
-   - **Service Name**: `backend`
+2. ตั้งชื่อ Service: `backend`
 3. คลิกที่ service `backend` → แท็บ **Settings**:
    - **Root Directory**: `backend`
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm start`
+   - Railway จะตรวจเจอ [Dockerfile](cci:7://file:///c:/Users/Admin/AppData/Local/Programs/Zed/activity-system/backend/Dockerfile:0:0-0:0) ในโฟลเดอร์ backend แล้ว **build Docker image ให้อัตโนมัติ**
+   - ไม่ต้องตั้ง Build Command / Start Command (Dockerfile จัดการให้แล้ว)
+
 4. ไปแท็บ **Variables** → กด **New Variable** เพิ่มทีละตัว:
 
 | Variable | Value |
@@ -64,7 +88,7 @@ git push -u origin main
 | `NODE_ENV` | `production` |
 | `PORT` | `5000` |
 
-> 💡 ค่าที่ขึ้นต้นด้วย `${{MySQL.xxx}}` Railway จะแทนค่าจาก MySQL service ให้อัตโนมัติ
+> 💡 ค่าที่ขึ้นต้นด้วย `${{MySQL.xxx}}` เป็น Reference Variable — Railway จะแทนค่าจาก MySQL service ให้อัตโนมัติ
 
 5. ไปแท็บ **Settings** → **Networking** → กด **Generate Domain**
    - จะได้ URL เช่น `backend-abc123.up.railway.app`
@@ -72,15 +96,17 @@ git push -u origin main
 
 6. รอ deploy เสร็จ (ดูแท็บ **Deployments** สถานะเป็น ✅)
 
+**หลักการทำงานของ Backend Dockerfile:**
+
 ## ขั้นที่ 5: Deploy Frontend
 
 1. กด **+ New** → **GitHub Repo** → เลือก `activity-system` อีกครั้ง
-2. ตั้งค่า:
-   - **Service Name**: `frontend`
+2. ตั้งชื่อ Service: `frontend`
 3. คลิกที่ service `frontend` → แท็บ **Settings**:
    - **Root Directory**: `frontend`
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm start`
+   - Railway จะตรวจเจอ [Dockerfile](cci:7://file:///c:/Users/Admin/AppData/Local/Programs/Zed/activity-system/backend/Dockerfile:0:0-0:0) แล้ว build Docker image ให้อัตโนมัติ
+   - ไม่ต้องตั้ง Build Command / Start Command
+
 4. ไปแท็บ **Variables** → เพิ่ม:
 
 | Variable | Value |
@@ -88,13 +114,18 @@ git push -u origin main
 | `BACKEND_URL` | `http://backend.railway.internal:5000` |
 | `PORT` | `3000` |
 
-> 💡 `backend.railway.internal` คือ internal network ของ Railway — service คุยกันได้โดยไม่ต้องผ่าน internet (เร็วกว่าและปลอดภัยกว่า)
+> ⚠️ **สำคัญ:** `BACKEND_URL` ถูกใช้เป็น **Docker Build Argument** ใน Dockerfile ซึ่ง Next.js จะนำค่านี้ไป bake ลงใน rewrites config ตอน build
+> ดังนั้นถ้าเปลี่ยนค่า `BACKEND_URL` จะต้อง **re-deploy (build ใหม่)** ถึงจะมีผล
+
+> 💡 `backend.railway.internal` คือ **Private Network** ภายใน Railway — service ในโปรเจกต์เดียวกันสื่อสารกันได้โดยไม่ต้องผ่าน internet (เร็วกว่าและปลอดภัยกว่า)
 
 5. ไปแท็บ **Settings** → **Networking** → กด **Generate Domain**
    - จะได้ URL เช่น `frontend-abc123.up.railway.app`
-   - **นี่คือ URL สำหรับเข้าเว็บ!**
+   - **นี่คือ URL สำหรับเข้าใช้งานเว็บไซต์!**
 
 6. รอ deploy เสร็จ
+
+**หลักการทำงานของ Frontend Dockerfile (Multi-stage build):**
 
 ## ขั้นที่ 6: ทดสอบ
 
